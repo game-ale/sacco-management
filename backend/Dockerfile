@@ -26,5 +26,5 @@ RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 # Expose Render's default port
 EXPOSE 10000
 
-# Run migrations and start the server
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000
+# Run migrations, seed the database (ignore if already seeded), and start the server
+CMD php artisan migrate --force && (php artisan db:seed --force || true) && php artisan serve --host=0.0.0.0 --port=10000
