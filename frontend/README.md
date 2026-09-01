@@ -2,6 +2,7 @@
 
 React SPA for the SACCO Management System backend API.
 
+
 ## Tech Stack
 
 | Tool | Purpose |

@@ -2,11 +2,11 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LogOut, User } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useAuthStore } from '@/stores/auth'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ThemeToggle } from '@/components/ThemeToggle'
-import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { useAuthStore } from '../stores/auth'
+import { Button } from '../components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
+import ThemeToggle from '../components/ThemeToggle'
+import { LanguageSwitcher } from '../components/LanguageSwitcher'
 
 export default function DashboardPage() {
   const { t } = useTranslation()
@@ -15,9 +15,26 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!user) {
-      getProfile().catch(() => {
-        navigate('/login')
-      })
+      getProfile()
+        .then(() => {
+          const currentUser = useAuthStore.getState().user
+          if (currentUser?.role === 'superadmin') {
+            navigate('/super-admin', { replace: true })
+          } else if (currentUser?.role === 'admin') {
+            navigate('/admin', { replace: true })
+          } else if (currentUser?.role === 'member') {
+            navigate('/member', { replace: true })
+          }
+        })
+        .catch(() => {
+          navigate('/login')
+        })
+    } else if (user.role === 'superadmin') {
+      navigate('/super-admin', { replace: true })
+    } else if (user.role === 'admin') {
+      navigate('/admin', { replace: true })
+    } else if (user.role === 'member') {
+      navigate('/member', { replace: true })
     }
   }, [user, getProfile, navigate])
 

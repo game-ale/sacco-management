@@ -22,7 +22,7 @@ class ActivityLogger
         $data = array_merge([
             'action' => $action,
             'description' => $description,
-            'user_id' => Auth::id(),
+            'member_id' => Auth::id(),
             'ip_address' => $request?->ip(),
             'user_agent' => $request?->userAgent(),
             'timestamp' => now()->toIso8601String(),

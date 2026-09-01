@@ -31,10 +31,10 @@ class AuthController extends Controller
      *
      * @unauthenticated
      *
-     * @param RegisterRequest $request
+     * @param  RegisterRequest  $request
      * @return JsonResponse
      */
-    public function register(RegisterRequest $request): AuthResource | JsonResponse
+    public function register(RegisterRequest $request): AuthResource|JsonResponse
     {
         try {
             return DB::transaction(function () use ($request) {
@@ -65,15 +65,32 @@ class AuthController extends Controller
      *
      * @unauthenticated
      *
-     * @param LoginRequest $request
+     * @param  LoginRequest  $request
      * @return JsonResponse
      */
-    public function login(LoginRequest $request): AuthResource | JsonResponse
+    public function login(LoginRequest $request): AuthResource|JsonResponse
     {
 
         $request->authenticate();
 
         $user = $request->user();
+
+        // Block login if the user's SACCO is rejected
+        if ($user->sacco && $user->sacco->status === 'rejected') {
+            // Revoke the token that was just created by authenticate() or prevent it
+            // Actually $request->authenticate() might not create a token, it just authenticates the session/user
+            throw ValidationException::withMessages([
+                'login' => 'Your SACCO registration has been rejected. Please contact support.',
+            ]);
+        }
+
+        // Append savings_balance from latest savings transaction
+        $latestBalance = \App\Models\SavingsTransaction::where('member_id', $user->id)
+            ->latest('transaction_date')
+            ->latest('id')
+            ->value('balance_after');
+
+        $user->savings_balance = (float) ($latestBalance ?? 0);
 
         ActivityLogger::login($request);
 
@@ -83,7 +100,7 @@ class AuthController extends Controller
     /**
      * Logout User
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return JsonResponse
      */
     public function logout(Request $request): JsonResponse
@@ -99,7 +116,7 @@ class AuthController extends Controller
     /**
      * Change Password
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return JsonResponse
      */
     public function changePassword(Request $request): JsonResponse
@@ -131,12 +148,48 @@ class AuthController extends Controller
     /**
      * Get User
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return UserResource
      */
     public function profile(Request $request): UserResource
     {
-        return UserResource::make($request->user());
+        $user = $request->user();
+
+        // Append savings_balance from latest savings transaction
+        $latestBalance = \App\Models\SavingsTransaction::where('member_id', $user->id)
+            ->latest('transaction_date')
+            ->latest('id')
+            ->value('balance_after');
+
+        $user->savings_balance = (float) ($latestBalance ?? 0);
+
+        return UserResource::make($user);
+    }
+
+    /**
+     * Update User Profile
+     *
+     * @param  Request  $request
+     * @return UserResource
+     */
+    public function updateProfile(Request $request): UserResource
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => ['sometimes', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'national_id' => ['nullable', 'string', 'max:50'],
+            'region' => ['nullable', 'string', 'max:100'],
+            'zone' => ['nullable', 'string', 'max:100'],
+            'town' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $user->update($validated);
+
+        ActivityLogger::log('profile_updated', 'User updated their profile', $request, ['user_id' => $user->id]);
+
+        return UserResource::make($user->fresh());
     }
 
     /**
@@ -189,7 +242,7 @@ class AuthController extends Controller
     /**
      * Forgot Password
      *
-     * @param ForgotPasswordRequest $request
+     * @param  ForgotPasswordRequest  $request
      * @return JsonResponse
      */
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
@@ -212,7 +265,7 @@ class AuthController extends Controller
     /**
      * Reset Password
      *
-     * @param ResetPasswordRequest $request
+     * @param  ResetPasswordRequest  $request
      * @return JsonResponse
      */
     public function resetPassword(ResetPasswordRequest $request): JsonResponse

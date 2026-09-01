@@ -12,14 +12,14 @@ const localStorageMock = {
 Object.defineProperty(window, 'localStorage', { value: localStorageMock })
 
 // Mock the API
-vi.mock('@/lib/api', () => ({
+vi.mock('../lib/api', () => ({
   default: {
     post: vi.fn(),
     get: vi.fn(),
   },
 }))
 
-import api from '@/lib/api'
+import api from '../lib/api'
 
 describe('Auth Store', () => {
   beforeEach(() => {

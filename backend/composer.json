@@ -6,7 +6,7 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.3|^8.4",
         "dedoc/scramble": "^0.13.12",
         "grazulex/laravel-apiroute": "^2.0",
         "laravel/framework": "^12.0",

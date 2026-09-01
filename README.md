@@ -103,6 +103,15 @@ See [`Backend/README.md`](./Backend/README.md) for full commit message and pull 
 
 This kit ships with a generic, tested `User` model and full auth flow — nothing domain-specific. Your team's own entities, business rules, and screens are built on top of this foundation, following the same Route → Controller → Request → Resource → Test pattern the Auth feature already demonstrates. See **GETTING-STARTED.docx** for a step-by-step walkthrough.
 
+## Full Name
 
+```bash
+Gemechu Alemu
+Begonet Debebe
+```
 
 test
+
+# Mahder Seifu
+bethelhem kefeni
+meklit hailemichael

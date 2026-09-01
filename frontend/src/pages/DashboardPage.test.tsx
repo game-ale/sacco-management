@@ -13,7 +13,7 @@ const mockUser = {
   updated_at: '2026-01-01',
 }
 
-vi.mock('@/stores/auth', () => ({
+vi.mock('../stores/auth', () => ({
   useAuthStore: vi.fn(() => ({
     user: mockUser,
     getProfile: vi.fn(),
@@ -23,12 +23,12 @@ vi.mock('@/stores/auth', () => ({
   })),
 }))
 
-vi.mock('@/components/LanguageSwitcher', () => ({
+vi.mock('../components/LanguageSwitcher', () => ({
   LanguageSwitcher: () => <button data-testid="lang-switcher">Lang</button>,
 }))
 
-vi.mock('@/components/ThemeToggle', () => ({
-  ThemeToggle: () => <button data-testid="theme-toggle">Theme</button>,
+vi.mock('../components/ThemeToggle', () => ({
+  default: () => <button data-testid="theme-toggle">Theme</button>,
 }))
 
 describe('DashboardPage', () => {
