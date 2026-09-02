@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '../../stores/auth'
 import ThemeToggle from '../../components/ThemeToggle'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
 import { GlobalSearch } from '../../components/admin/GlobalSearch'
 import { NotificationDropdown } from '../../components/admin/NotificationDropdown'
 import { PendingSaccoPage } from '../../pages/admin/PendingSaccoPage'
@@ -147,6 +148,8 @@ export const AdminLayout: React.FC = () => {
           {/* Right Items */}
           <div className="flex items-center gap-5">
             <ThemeToggle />
+
+            <LanguageSwitcher />
             
             <GlobalSearch />
             

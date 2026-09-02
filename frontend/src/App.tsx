@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { useAuthStore } from "./stores/auth";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { PageTextLocalizer } from "./i18n/pageText";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -144,6 +145,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ErrorBoundary>
+          <PageTextLocalizer />
           <Routes>
             <Route element={<PublicLayout />}>
               <Route path="/" element={<LandingPage />} />

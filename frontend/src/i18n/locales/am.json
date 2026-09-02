@@ -62,7 +62,8 @@
   },
   "language": {
     "en": "English",
-    "am": "አማርኛ"
+    "am": "አማርኛ",
+    "om": "Afaan Oromoo"
   },
   "member": {
     "member_id": "የአባል መታወቂያ: #{{id}}",

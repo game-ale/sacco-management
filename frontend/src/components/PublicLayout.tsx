@@ -3,6 +3,7 @@ import { Shield, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import ThemeToggle from "./ThemeToggle";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export default function PublicLayout() {
   const location = useLocation();
@@ -54,6 +55,7 @@ export default function PublicLayout() {
             {/* CTAs */}
             <div className="hidden md:flex items-center space-x-4">
               <ThemeToggle />
+              <LanguageSwitcher />
               <Link
                 to="/login"
                 className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#0B6B3A] dark:hover:text-emerald-400 transition-colors"
@@ -110,6 +112,9 @@ export default function PublicLayout() {
                 <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2 flex flex-col">
                   <div className="px-3 pb-2">
                     <ThemeToggle />
+                  </div>
+                  <div className="px-3 pb-2">
+                    <LanguageSwitcher />
                   </div>
                   <Link
                     to="/login"

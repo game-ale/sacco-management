@@ -62,7 +62,8 @@
   },
   "language": {
     "en": "English",
-    "am": "Amharic"
+    "am": "Amharic",
+    "om": "Afan Oromo"
   },
   "member": {
     "member_id": "Member ID: #{{id}}",
