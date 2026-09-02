@@ -25,6 +25,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property-read string|null $region
  * @property-read string|null $zone
  * @property-read string|null $town
+ * @property-read bool $must_change_password
  * @property-read Carbon|null $email_verified_at
  * @property-read Carbon|null $created_at
  * @property-read Carbon|null $updated_at
@@ -46,7 +47,15 @@ class UserResource extends JsonResource
             'username' => $this->username,
             'role' => $this->role,
             'sacco_id' => $this->sacco_id,
+            'sacco_name' => $this->sacco ? $this->sacco->name : null,
             'sacco_status' => $this->sacco ? $this->sacco->status : null,
+            'sacco' => $this->sacco ? [
+                'id' => $this->sacco->id,
+                'name' => $this->sacco->name,
+                'registration_number' => $this->sacco->registration_number,
+                'status' => $this->sacco->status,
+                'share_value' => (float) ($this->sacco->share_value ?? 100),
+            ] : null,
             'national_id' => $this->national_id,
             'region' => $this->region,
             'zone' => $this->zone,
@@ -54,6 +63,7 @@ class UserResource extends JsonResource
             'num_shares' => (int) ($this->num_shares ?? 0),
             'savings_balance' => (float) ($this->savings_balance ?? 0),
             'is_active' => (bool) ($this->is_active ?? true),
+            'must_change_password' => (bool) $this->must_change_password,
             'email_verified_at' => $this->email_verified_at?->toDateTimeString(),
             'created_at' => $this->created_at?->toDateTimeString(),
             'updated_at' => $this->updated_at?->toDateTimeString(),

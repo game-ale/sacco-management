@@ -178,3 +178,34 @@ export async function submitSupportTicket(
 export function markNotificationsReadKey(userId: number | string | undefined): string {
   return storageKey(userId, 'notifications-read')
 }
+
+export interface ApiNotification {
+  id: string
+  type: string
+  notifiable_type?: string
+  notifiable_id?: number
+  data: {
+    title?: string
+    message?: string
+    type?: string
+    icon?: string
+    loan_id?: number
+    [key: string]: any
+  }
+  read_at: string | null
+  created_at: string
+  updated_at?: string
+}
+
+export async function fetchNotifications(): Promise<ApiNotification[]> {
+  const res = await api.get<{ data: ApiNotification[] }>('/notifications')
+  return res.data.data ?? []
+}
+
+export async function markNotificationAsRead(id: string): Promise<void> {
+  await api.patch(`/notifications/${id}/read`)
+}
+
+export async function markAllNotificationsAsRead(): Promise<void> {
+  await api.post('/notifications/read-all')
+}

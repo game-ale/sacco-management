@@ -251,6 +251,22 @@ class LoanController extends Controller
             'approved_by' => $request->user()->id,
         ]);
 
+        if ($loan->user) {
+            $loan->user->notifications()->create([
+                'id' => (string) \Illuminate\Support\Str::uuid(),
+                'type' => 'App\Notifications\LoanStatusUpdated',
+                'data' => [
+                    'title' => 'Loan Application Approved',
+                    'message' => "Your loan application #{$loan->loan_number} for ETB " . number_format((float)$loan->principal_amount, 2) . " has been approved.",
+                    'type' => 'loan_application',
+                    'status' => 'approved',
+                    'loan_id' => $loan->id,
+                    'action_url' => "/member/loans/{$loan->id}",
+                    'icon' => 'check-circle'
+                ]
+            ]);
+        }
+
         return $this->success(
             LoanResource::make($loan->fresh(['guarantors.member', 'user'])),
             'Loan approved successfully.'
@@ -278,6 +294,25 @@ class LoanController extends Controller
             'status' => 'rejected',
             'rejection_reason' => $request->rejection_reason,
         ]);
+
+        if ($loan->user) {
+            $loan->user->notifications()->create([
+                'id' => (string) \Illuminate\Support\Str::uuid(),
+                'type' => 'App\Notifications\LoanStatusUpdated',
+                'data' => [
+                    'title' => 'Loan Application Update',
+                    'message' => $request->rejection_reason
+                        ? "Your loan application was not approved: {$request->rejection_reason}"
+                        : 'Your loan application was not approved.',
+                    'type' => 'loan_application',
+                    'status' => 'rejected',
+                    'loan_id' => $loan->id,
+                    'rejection_reason' => $request->rejection_reason,
+                    'action_url' => "/member/loans/{$loan->id}",
+                    'icon' => 'x-circle'
+                ]
+            ]);
+        }
 
         return $this->success(
             LoanResource::make($loan->fresh()),
@@ -307,6 +342,22 @@ class LoanController extends Controller
                 'status' => 'active',
                 'disbursed_at' => now(),
             ]);
+
+            if ($loan->user) {
+                $loan->user->notifications()->create([
+                    'id' => (string) \Illuminate\Support\Str::uuid(),
+                    'type' => 'App\Notifications\LoanStatusUpdated',
+                    'data' => [
+                        'title' => 'Loan Funds Disbursed',
+                        'message' => "ETB " . number_format((float)$loan->principal_amount, 2) . " has been disbursed for loan #{$loan->loan_number} and is now active.",
+                        'type' => 'loan_disbursed',
+                        'status' => 'disbursed',
+                        'loan_id' => $loan->id,
+                        'action_url' => "/member/loans/{$loan->id}",
+                        'icon' => 'credit-card'
+                    ]
+                ]);
+            }
 
             $loan->schedules()->delete();
 
@@ -358,7 +409,7 @@ class LoanController extends Controller
      */
     public function myLoans(Request $request): AnonymousResourceCollection
     {
-        $loans = Loan::where('member_id', $request->user()->id)->latest()->paginate(15);
+        $loans = Loan::where('member_id', $request->user()->id)->with(['schedules'])->latest()->paginate(15);
 
         return LoanResource::collection($loans);
     }

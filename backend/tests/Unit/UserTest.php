@@ -31,6 +31,11 @@ class UserTest extends TestCase
             'region',
             'zone',
             'town',
+            'must_change_password',
+            'two_factor_secret',
+            'two_factor_recovery_codes',
+            'two_factor_confirmed_at',
+            'two_factor_remember_token',
         ];
 
         $this->assertEquals($expected, $user->getFillable());
@@ -41,7 +46,13 @@ class UserTest extends TestCase
         $user = new User();
 
         $this->assertEquals(
-            ['password', 'remember_token'],
+            [
+                'password', 
+                'remember_token',
+                'two_factor_secret',
+                'two_factor_recovery_codes',
+                'two_factor_remember_token',
+            ],
             $user->getHidden()
         );
     }

@@ -8,7 +8,11 @@ import {
   CheckCircle2,
   XCircle,
   ShieldAlert,
+  ShieldOff,
+  Key,
+  Loader2,
 } from 'lucide-react'
+import * as Dialog from '@radix-ui/react-dialog'
 import { toast } from 'sonner'
 import { superAdminUserService, type GetUsersParams } from '../../services/superAdminUserService'
 
@@ -18,6 +22,8 @@ export const AllUsersPage: React.FC = () => {
     page: 1,
     sort: 'newest',
   })
+  const [resetPasswordUser, setResetPasswordUser] = useState<any | null>(null)
+  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ['superadmin-users', params],
@@ -43,6 +49,28 @@ export const AllUsersPage: React.FC = () => {
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || 'Failed to activate user')
+    },
+  })
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: (id: number) => superAdminUserService.resetPassword(id),
+    onSuccess: (data) => {
+      setTemporaryPassword(data?.data?.temporary_password)
+      toast.success('Password reset successfully')
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to reset password')
+    },
+  })
+
+  const disable2FaMutation = useMutation({
+    mutationFn: (id: number) => superAdminUserService.disableTwoFactor(id),
+    onSuccess: () => {
+      toast.success('Two-factor authentication disabled for user')
+      queryClient.invalidateQueries({ queryKey: ['superadmin-users'] })
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to disable 2FA')
     },
   })
 
@@ -210,6 +238,28 @@ export const AllUsersPage: React.FC = () => {
                     <td className="px-6 py-4 text-right">
                       {user.role !== 'superadmin' && (
                         <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => setResetPasswordUser(user)}
+                            className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/60 rounded-lg transition-colors cursor-pointer"
+                            title="Reset Password"
+                          >
+                            <Key className="w-4 h-4" />
+                          </button>
+                          
+                          {user.two_factor_confirmed_at && (
+                            <button
+                              onClick={() => {
+                                if(window.confirm('Are you sure you want to disable 2FA for this user? This is an emergency recovery action.')) {
+                                  disable2FaMutation.mutate(user.id)
+                                }
+                              }}
+                              className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/60 rounded-lg transition-colors cursor-pointer"
+                              title="Disable 2FA"
+                            >
+                              <ShieldOff className="w-4 h-4" />
+                            </button>
+                          )}
+
                           {user.is_active !== false ? (
                             <button
                               onClick={() => {
@@ -270,6 +320,86 @@ export const AllUsersPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Reset Password Modal */}
+      <Dialog.Root 
+        open={!!resetPasswordUser} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setResetPasswordUser(null)
+            setTemporaryPassword(null)
+          }
+        }}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 transition-opacity" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800 p-6 space-y-4 text-center">
+            <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
+              <Key className="w-6 h-6" />
+            </div>
+            <div>
+              <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">Reset Password</Dialog.Title>
+              {!temporaryPassword ? (
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
+                  Are you sure you want to reset the password for <span className="font-bold text-slate-800 dark:text-slate-200">{resetPasswordUser?.name}</span>? 
+                  They will be forced to change it on their next login.
+                </p>
+              ) : (
+                <div className="mt-4 p-4 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg">
+                  <p className="text-xs text-emerald-800 dark:text-emerald-300 font-medium mb-2">Temporary Password Generated!</p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 px-3 py-2 bg-white dark:bg-slate-800 rounded border border-emerald-200 dark:border-emerald-500/20 text-slate-800 dark:text-slate-200 font-mono text-sm">
+                      {temporaryPassword}
+                    </code>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(temporaryPassword)
+                        toast.success('Password copied to clipboard')
+                      }}
+                      className="p-2 bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors cursor-pointer"
+                      title="Copy to clipboard"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2">Please share this with the user securely.</p>
+                </div>
+              )}
+            </div>
+            {!temporaryPassword ? (
+              <div className="flex justify-center gap-3 pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => setResetPasswordUser(null)}
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button"
+                  disabled={resetPasswordMutation.isPending}
+                  onClick={() => resetPasswordUser && resetPasswordMutation.mutate(resetPasswordUser.id)}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-700 disabled:opacity-50 cursor-pointer"
+                >
+                  {resetPasswordMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {resetPasswordMutation.isPending ? 'Resetting...' : 'Reset Password'}
+                </button>
+              </div>
+            ) : (
+              <button 
+                type="button"
+                onClick={() => {
+                  setResetPasswordUser(null)
+                  setTemporaryPassword(null)
+                }}
+                className="w-full px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 cursor-pointer"
+              >
+                Done
+              </button>
+            )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   )
 }

@@ -83,6 +83,7 @@ describe('LoginPage', () => {
     expect(mockLogin).toHaveBeenCalledWith({
       login: 'john@example.com',
       password: 'password123',
+      remember_me: false,
     })
   })
 

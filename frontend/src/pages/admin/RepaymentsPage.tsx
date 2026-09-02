@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { AlertTriangle, Search, CheckCircle2, Download, PlusCircle, Loader2 } from 'lucide-react'
+import { AlertTriangle, Search, CheckCircle2, Download, PlusCircle, Loader2, Clock, Check, X } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { format } from 'date-fns'
 
@@ -10,7 +10,7 @@ import { exportToCSV } from '../../utils/exportToCSV'
 import type { LoanSchedule } from '../../types'
 
 export const RepaymentsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('record')
+  const [activeTab, setActiveTab] = useState<'record' | 'overdue' | 'requests'>('record')
   const [selectedLoanId, setSelectedLoanId] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
@@ -22,7 +22,48 @@ export const RepaymentsPage: React.FC = () => {
   const [paymentDate, setPaymentDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   const [paymentMethod, setPaymentMethod] = useState('manual')
 
+  // Payment Request Rejection Modal State
+  const [rejectingRequestId, setRejectingRequestId] = useState<number | null>(null)
+  const [rejectionReason, setRejectionReason] = useState('')
+
   const queryClient = useQueryClient()
+
+  // Fetch pending payment requests
+  const { data: paymentRequestsData, isLoading: isRequestsLoading } = useQuery({
+    queryKey: ['adminPaymentRequests', 'pending'],
+    queryFn: () => adminService.getPaymentRequests('pending')
+  })
+  const pendingPaymentRequests = paymentRequestsData?.data || []
+
+  // Approve Payment Request Mutation
+  const approveRequestMutation = useMutation({
+    mutationFn: (id: number) => adminService.approvePaymentRequest(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminPaymentRequests'] })
+      queryClient.invalidateQueries({ queryKey: ['adminActiveLoans'] })
+      queryClient.invalidateQueries({ queryKey: ['adminOverdueRepayments'] })
+      if (selectedLoanId) {
+        queryClient.invalidateQueries({ queryKey: ['adminLoanDetails', selectedLoanId] })
+      }
+    },
+    onError: (err: any) => {
+      alert(err?.response?.data?.message || 'Approval failed.')
+    }
+  })
+
+  // Reject Payment Request Mutation
+  const rejectRequestMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason: string }) =>
+      adminService.rejectPaymentRequest(id, { rejection_reason: reason }),
+    onSuccess: () => {
+      setRejectingRequestId(null)
+      setRejectionReason('')
+      queryClient.invalidateQueries({ queryKey: ['adminPaymentRequests'] })
+    },
+    onError: (err: any) => {
+      alert(err?.response?.data?.message || 'Rejection failed.')
+    }
+  })
 
   // Fetch active loans for search
   const { data: loansData } = useQuery({
@@ -152,6 +193,10 @@ export const RepaymentsPage: React.FC = () => {
     setIsPaymentModalOpen(true)
   }
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB' }).format(amount)
+  }
+
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } }
@@ -171,7 +216,7 @@ export const RepaymentsPage: React.FC = () => {
       <div>
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Repayments</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Manage loan installments and track overdue payments.
+          Review payment requests, record loan installments, and track overdue payments.
         </p>
       </div>
 
@@ -207,6 +252,22 @@ export const RepaymentsPage: React.FC = () => {
       <div className="border-b border-slate-200 dark:border-slate-800">
         <nav className="flex space-x-8">
           <button
+            onClick={() => setActiveTab('requests')}
+            className={`py-4 border-b-2 font-medium text-sm transition-colors cursor-pointer flex items-center gap-2 ${
+              activeTab === 'requests'
+                ? 'border-[#0B6B3A] dark:border-emerald-500 text-[#0B6B3A] dark:text-emerald-400 font-bold'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+            }`}
+          >
+            Pending Requests
+            {pendingPaymentRequests.length > 0 && (
+              <span className="px-2 py-0.5 text-xs bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 rounded-full font-bold">
+                {pendingPaymentRequests.length}
+              </span>
+            )}
+          </button>
+
+          <button
             onClick={() => setActiveTab('record')}
             className={`py-4 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
               activeTab === 'record'
@@ -214,8 +275,9 @@ export const RepaymentsPage: React.FC = () => {
                 : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
           >
-            Record Payment
+            Direct Repayment
           </button>
+
           <button
             onClick={() => setActiveTab('overdue')}
             className={`py-4 border-b-2 font-medium text-sm transition-colors cursor-pointer flex items-center gap-2 ${
@@ -233,6 +295,93 @@ export const RepaymentsPage: React.FC = () => {
           </button>
         </nav>
       </div>
+
+      {/* Pending Payment Requests Tab */}
+      {activeTab === 'requests' && (
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-amber-500" />
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                Pending Member Payment Submissions ({pendingPaymentRequests.length})
+              </h3>
+            </div>
+          </div>
+
+          {isRequestsLoading ? (
+            <div className="px-6 py-8 text-center text-slate-400">
+              <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
+              Loading payment requests...
+            </div>
+          ) : pendingPaymentRequests.length === 0 ? (
+            <div className="px-6 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+              No pending payment requests to review.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase text-[11px] tracking-wider">
+                  <tr>
+                    <th className="px-6 py-3">Member</th>
+                    <th className="px-6 py-3">Loan / Installment</th>
+                    <th className="px-6 py-3">Amount Paid</th>
+                    <th className="px-6 py-3">Method / Ref</th>
+                    <th className="px-6 py-3">Requested Date</th>
+                    <th className="px-6 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {pendingPaymentRequests.map((req: any) => (
+                    <tr key={req.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">
+                        {req.member?.name || `Member #${req.member_id}`}
+                        <div className="text-xs font-normal text-slate-400">{req.member?.email}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-mono text-xs font-bold text-slate-900 dark:text-white">
+                          {req.loan?.loan_number || `Loan #${req.loan_id}`}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          Inst #{req.loan_schedule?.installment_number ?? '-'} (Due: {req.loan_schedule?.due_date ?? '-'})
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">
+                        {formatCurrency(Number(req.amount))}
+                      </td>
+                      <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                        <span className="capitalize font-medium">{req.method?.replace('_', ' ') || 'Manual'}</span>
+                        {req.notes && <div className="text-xs text-slate-400 mt-0.5">{req.notes}</div>}
+                      </td>
+                      <td className="px-6 py-4 text-slate-500 text-xs">
+                        {req.created_at ? new Date(req.created_at).toLocaleDateString() : req.payment_date || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => approveRequestMutation.mutate(req.id)}
+                            disabled={approveRequestMutation.isPending}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+                          >
+                            <Check className="w-3.5 h-3.5" /> Approve
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setRejectingRequestId(req.id)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded-lg hover:bg-rose-700"
+                          >
+                            <X className="w-3.5 h-3.5" /> Reject
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Record Payment Tab */}
       {activeTab === 'record' && (
@@ -346,7 +495,7 @@ export const RepaymentsPage: React.FC = () => {
                   className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#0B6B3A] text-white rounded-lg text-sm font-semibold hover:bg-[#095730] transition-colors shadow-sm cursor-pointer"
                 >
                   <PlusCircle className="w-4 h-4" />
-                  Record New Payment
+                  Record Direct Payment
                 </button>
               </div>
             )}
@@ -561,6 +710,47 @@ export const RepaymentsPage: React.FC = () => {
         </div>
       )}
 
+      {/* Payment Request Rejection Modal */}
+      {rejectingRequestId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl p-6 shadow-xl border border-slate-200 dark:border-slate-800">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Reject Payment Request
+            </h3>
+            <p className="text-xs text-slate-500 mb-4">
+              Provide a reason for rejecting this payment submission (optional).
+            </p>
+            <textarea
+              rows={3}
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="e.g. Payment receipt invalid or transaction reference not found"
+              className="w-full p-3 text-sm bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+            />
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setRejectingRequestId(null)
+                  setRejectionReason('')
+                }}
+                className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => rejectRequestMutation.mutate({ id: rejectingRequestId, reason: rejectionReason })}
+                disabled={rejectRequestMutation.isPending}
+                className="px-4 py-2 text-sm font-semibold bg-rose-600 text-white hover:bg-rose-700 rounded-lg disabled:opacity-50"
+              >
+                {rejectRequestMutation.isPending ? 'Rejecting...' : 'Confirm Rejection'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Record Repayment Modal */}
       <Dialog.Root open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
         <Dialog.Portal>
@@ -568,7 +758,7 @@ export const RepaymentsPage: React.FC = () => {
           <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">
-                Record Loan Repayment
+                Record Direct Loan Repayment
               </Dialog.Title>
             </div>
 

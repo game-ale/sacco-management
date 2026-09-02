@@ -87,6 +87,43 @@ class LoanResource extends JsonResource
             $allAccepted = false;
         }
 
+        $nextInstallmentData = null;
+        $nextDueDate = null;
+        $nextDueAmount = null;
+        $outstandingBalance = (float) ($this->total_repayable ?? $this->principal_amount);
+
+        if ($this->resource->relationLoaded('schedules') && $this->schedules->isNotEmpty()) {
+            $unpaidSchedules = $this->schedules
+                ->filter(fn ($s) => $s->status !== 'paid' && ((float) $s->total_due > (float) $s->amount_paid))
+                ->sortBy('due_date');
+
+            $totalUnpaid = 0.0;
+            foreach ($this->schedules as $s) {
+                $unpaidForSchedule = max(0.0, (float) $s->total_due - (float) $s->amount_paid);
+                $totalUnpaid += $unpaidForSchedule;
+            }
+            $outstandingBalance = round($totalUnpaid, 2);
+
+            $firstUnpaid = $unpaidSchedules->first();
+            if ($firstUnpaid) {
+                $dueDateObj = Carbon::parse($firstUnpaid->due_date);
+                $today = Carbon::now()->startOfDay();
+                $remainingDays = (int) $today->diffInDays($dueDateObj->startOfDay(), false);
+                $dueAmt = round(max(0.0, (float) $firstUnpaid->total_due - (float) $firstUnpaid->amount_paid), 2);
+
+                $nextDueDate = $dueDateObj->toDateString();
+                $nextDueAmount = $dueAmt;
+                $nextInstallmentData = [
+                    'id' => $firstUnpaid->id,
+                    'installment_number' => $firstUnpaid->installment_number,
+                    'due_date' => $nextDueDate,
+                    'amount_due' => $nextDueAmount,
+                    'remaining_days' => $remainingDays,
+                    'status' => $firstUnpaid->status,
+                ];
+            }
+        }
+
         return [
             'id' => $this->id,
             'loan_number' => $this->loan_number,
@@ -94,6 +131,10 @@ class LoanResource extends JsonResource
             'user_id' => $this->member_id,
             'member_id' => $this->member_id,
             'amount' => (float) $this->principal_amount,
+            'outstanding_balance' => $outstandingBalance,
+            'next_due_date' => $nextDueDate,
+            'next_due_amount' => $nextDueAmount,
+            'next_installment' => $nextInstallmentData,
             'purpose' => $this->purpose,
             'status' => $this->status,
             'interest_rate' => $this->interest_rate !== null ? (float) $this->interest_rate : null,

@@ -46,7 +46,11 @@ class InvitationController extends Controller
 
         Mail::to($request->email)->send(new MemberInvitationMail($invitation));
 
-        return $this->success(null, 'Invitation sent successfully.', 201);
+        return $this->success(
+            ['token' => $token],
+            'Invitation sent successfully.',
+            201
+        );
     }
 
     /**

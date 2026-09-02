@@ -16,7 +16,7 @@ class NotificationController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $notifications = $request->user()->notifications()->take(20)->get();
+        $notifications = $request->user()->notifications()->take(50)->get();
 
         return $this->success(
             $notifications,

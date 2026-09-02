@@ -5,6 +5,8 @@ import api from '../lib/api'
 interface AuthState {
   user: User | null
   token: string | null
+  twoFactorToken: string | null
+  isTwoFactorPending: boolean
   isLoading: boolean
   isAuthenticated: boolean
   login: (data: LoginRequest) => Promise<void>
@@ -12,11 +14,15 @@ interface AuthState {
   logout: () => Promise<void>
   getProfile: () => Promise<void>
   setToken: (token: string) => void
+  setTwoFactorPending: (pending: boolean, token?: string | null) => void
+  clearTwoFactorState: () => void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: localStorage.getItem('token'),
+  twoFactorToken: null,
+  isTwoFactorPending: false,
   isLoading: false,
   isAuthenticated: !!localStorage.getItem('token'),
 
@@ -24,6 +30,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true })
     try {
       const response = await api.post<AuthResponse>('/login', data)
+      
+      if (response.data.two_factor_required) {
+        set({
+          twoFactorToken: response.data.two_factor_token || null,
+          isTwoFactorPending: true,
+          isLoading: false,
+        })
+        return
+      }
+
       const { user, access_token } = response.data
       localStorage.setItem('token', access_token)
       set({ user, token: access_token, isAuthenticated: true, isLoading: false })
@@ -51,7 +67,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await api.post('/logout')
     } finally {
       localStorage.removeItem('token')
-      set({ user: null, token: null, isAuthenticated: false })
+      set({ user: null, token: null, isAuthenticated: false, twoFactorToken: null, isTwoFactorPending: false })
     }
   },
 
@@ -68,6 +84,14 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setToken: (token: string) => {
     localStorage.setItem('token', token)
-    set({ token, isAuthenticated: true })
+    set({ token, isAuthenticated: true, isTwoFactorPending: false, twoFactorToken: null })
   },
+
+  setTwoFactorPending: (pending: boolean, token: string | null = null) => {
+    set({ isTwoFactorPending: pending, twoFactorToken: token })
+  },
+
+  clearTwoFactorState: () => {
+    set({ isTwoFactorPending: false, twoFactorToken: null })
+  }
 }))

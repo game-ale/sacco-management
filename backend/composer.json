@@ -7,12 +7,14 @@
     "license": "MIT",
     "require": {
         "php": "^8.3|^8.4",
+        "bacon/bacon-qr-code": "*",
         "dedoc/scramble": "^0.13.12",
         "grazulex/laravel-apiroute": "^2.0",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
-        "opcodesio/log-viewer": "^3.14"
+        "opcodesio/log-viewer": "^3.14",
+        "pragmarx/google2fa-laravel": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

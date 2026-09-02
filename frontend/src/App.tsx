@@ -7,6 +7,11 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
+import { ForceChangePasswordPage } from "./pages/ForceChangePasswordPage";
+import { TwoFactorChallengePage } from "./pages/TwoFactorChallengePage";
+import { TwoFactorSetupPage } from "./pages/TwoFactorSetupPage";
 import { useEffect, useState } from "react";
 
 import { SuperAdminLayout } from "./layouts/super-admin/SuperAdminLayout";
@@ -49,13 +54,15 @@ import { SettingsPage } from "./pages/admin/SettingsPage";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.must_change_password) return <Navigate to="/force-change-password" replace />;
   return <>{children}</>;
 }
 function MemberRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.must_change_password) return <Navigate to="/force-change-password" replace />;
   if (user?.role !== "member") {
     return <Navigate to="/dashboard" replace />;
   }
@@ -64,6 +71,7 @@ function MemberRoute({ children }: { children: React.ReactNode }) {
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.must_change_password) return <Navigate to="/force-change-password" replace />;
   if (user?.role !== "admin") {
     return <Navigate to="/dashboard" replace />;
   }
@@ -72,6 +80,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 function SuperAdminRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.must_change_password) return <Navigate to="/force-change-password" replace />;
   if (user?.role !== "superadmin") {
     return <Navigate to="/dashboard" replace />;
   }
@@ -80,6 +89,9 @@ function SuperAdminRoute({ children }: { children: React.ReactNode }) {
 function GuestRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore();
   if (isAuthenticated) {
+    if (user?.must_change_password) {
+      return <Navigate to="/force-change-password" replace />;
+    }
     if (user?.role === "superadmin") {
       return <Navigate to="/super-admin" replace />;
     }
@@ -157,6 +169,34 @@ export default function App() {
               }
             />
             <Route
+              path="/forgot-password"
+              element={
+                <GuestRoute>
+                  <ForgotPasswordPage />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                <GuestRoute>
+                  <ResetPasswordPage />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="/force-change-password"
+              element={<ForceChangePasswordPage />}
+            />
+            <Route
+              path="/two-factor-challenge"
+              element={
+                <GuestRoute>
+                  <TwoFactorChallengePage />
+                </GuestRoute>
+              }
+            />
+            <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
@@ -182,6 +222,7 @@ export default function App() {
               <Route path="shares" element={<SharesPage />} />
               <Route path="dividends" element={<DividendsPage />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="two-factor-setup" element={<TwoFactorSetupPage />} />
             </Route>
 
             {/* Super Admin Routes */}
@@ -199,6 +240,7 @@ export default function App() {
               <Route path="users" element={<AllUsersPage />} />
               <Route path="reports" element={<PlatformReportsPage />} />
               <Route path="settings" element={<PlatformSettingsPage />} />
+              <Route path="two-factor-setup" element={<TwoFactorSetupPage />} />
             </Route>
             {/* Member Routes */}
             <Route

@@ -128,6 +128,10 @@ class MemberController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'national_id' => $request->national_id,
+            'region' => $request->region,
+            'zone' => $request->zone,
+            'town' => $request->town,
             'username' => $username,
             'password' => Hash::make($request->password ?? 'Password123!'),
             'num_shares' => $request->num_shares ?? 1,
@@ -205,5 +209,32 @@ class MemberController extends Controller
         $member->delete();
 
         return $this->deleted('Member deleted successfully.');
+    }
+
+    /**
+     * Admin resets member password.
+     *
+     * @param  Request  $request
+     * @param  User  $member
+     * @return JsonResponse
+     */
+    public function resetPassword(Request $request, User $member): JsonResponse
+    {
+        // Tenant Isolation Check
+        if ($member->sacco_id !== $request->user()->sacco_id || $member->role !== 'member') {
+            return $this->forbidden('You do not have permission to reset this member\'s password.');
+        }
+
+        $temporaryPassword = \Illuminate\Support\Str::random(8);
+
+        $member->forceFill([
+            'password' => Hash::make($temporaryPassword),
+            'must_change_password' => true,
+        ])->save();
+
+        return $this->success(
+            ['temporary_password' => $temporaryPassword],
+            'Password reset successfully. Please share the temporary password with the member.'
+        );
     }
 }
