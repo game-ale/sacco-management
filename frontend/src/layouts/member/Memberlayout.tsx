@@ -20,13 +20,14 @@ import {
   Menu,
   X,
   Zap,
+  Landmark,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth";
 import ThemeToggle from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { useMemberNotifications } from "../../hooks/useMemberNotifications";
+import { useMemberNotifications, MemberNotificationProvider } from "../../hooks/useMemberNotifications";
 
-export const MemberLayout: React.FC = () => {
+const MemberLayoutInner: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -138,6 +139,8 @@ export const MemberLayout: React.FC = () => {
 
   const memberIdDisplay = user?.id ?? "—";
 
+  const saccoName = user?.sacco_name || user?.sacco?.name;
+
   return (
     <div className="min-h-screen bg-[#F4F6F9] dark:bg-slate-950 flex flex-col md:flex-row font-sans text-slate-900 dark:text-slate-100">
       {/* Mobile Top Header */}
@@ -150,8 +153,9 @@ export const MemberLayout: React.FC = () => {
             <div className="font-bold text-sm leading-tight">
               {user?.name ?? ""}
             </div>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-              {t("member.member_id", { id: memberIdDisplay })}
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
+              <span>{t("member.member_id", { id: memberIdDisplay })}</span>
+              {saccoName && <span>• {saccoName}</span>}
             </div>
           </div>
         </div>
@@ -187,6 +191,12 @@ export const MemberLayout: React.FC = () => {
               <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
                 {t("member.member_id", { id: memberIdDisplay })}
               </div>
+              {saccoName && (
+                <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold truncate mt-0.5 flex items-center gap-1">
+                  <Landmark className="w-3.5 h-3.5 inline shrink-0" />
+                  <span className="truncate">{saccoName}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -269,21 +279,31 @@ export const MemberLayout: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 bg-[#F4F6F9] dark:bg-slate-950">
-        <header className="bg-white dark:bg-slate-900 border-b border-slate-200/90 dark:border-slate-800 px-6 py-3 hidden md:flex items-center justify-end gap-4 sticky top-0 z-30">
-          <LanguageSwitcher />
-          <ThemeToggle />
-          <button
-            className="relative p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-            aria-label={t("member.nav.notifications")}
-            onClick={() => navigate("/member/notifications")}
-          >
-            <Bell className="w-5 h-5" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">
-                {unreadCount}
-              </span>
+        <header className="bg-white dark:bg-slate-900 border-b border-slate-200/90 dark:border-slate-800 px-6 py-3 hidden md:flex items-center justify-between gap-4 sticky top-0 z-30">
+          <div className="flex items-center gap-2">
+            {saccoName && (
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-lg border border-emerald-200/70 dark:border-emerald-800/50">
+                <Landmark className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>{saccoName}</span>
+              </div>
             )}
-          </button>
+          </div>
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher />
+            <ThemeToggle />
+            <button
+              className="relative p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+              aria-label={t("member.nav.notifications")}
+              onClick={() => navigate("/member/notifications")}
+            >
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          </div>
         </header>
 
         <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
@@ -291,5 +311,13 @@ export const MemberLayout: React.FC = () => {
         </main>
       </div>
     </div>
+  );
+};
+
+export const MemberLayout: React.FC = () => {
+  return (
+    <MemberNotificationProvider>
+      <MemberLayoutInner />
+    </MemberNotificationProvider>
   );
 };

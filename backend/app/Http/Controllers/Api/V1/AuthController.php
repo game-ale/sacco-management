@@ -12,6 +12,7 @@ use App\Http\Resources\V1\UserResource;
 use App\Http\Traits\ApiResponse;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Http\Controllers\Api\V1\TwoFactorController;
 use Exception;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Verified;
@@ -82,6 +83,25 @@ class AuthController extends Controller
             throw ValidationException::withMessages([
                 'login' => 'Your SACCO registration has been rejected. Please contact support.',
             ]);
+        }
+
+        // Check if Two-Factor Authentication is enabled
+        if ($user->hasTwoFactorEnabled()) {
+            // Check if device is remembered
+            $rememberToken = $request->cookie('two_factor_remember_token') ?? $request->header('X-2FA-Remember');
+            
+            if (! $rememberToken || hash('sha256', $rememberToken) !== $user->two_factor_remember_token) {
+                // Device not remembered, issue a challenge
+                $twoFactorToken = TwoFactorController::createToken($user->id);
+                
+                ActivityLogger::log('2fa_challenge_issued', 'Two-factor challenge issued during login', $request, ['user_id' => $user->id]);
+
+                return response()->json([
+                    'two_factor_required' => true,
+                    'two_factor_token' => $twoFactorToken,
+                    'message' => 'Two-factor authentication required.',
+                ]);
+            }
         }
 
         // Append savings_balance from latest savings transaction

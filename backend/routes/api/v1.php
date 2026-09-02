@@ -19,7 +19,10 @@ use App\Http\Controllers\Api\V1\SaccoRegistrationController;
 use App\Http\Controllers\Api\V1\SaccoSettingsController;
 use App\Http\Controllers\Api\V1\SuperadminReportsController;
 use App\Http\Controllers\Api\V1\SuperadminUserController;
+use App\Http\Controllers\Api\V1\TwoFactorController;
 use App\Http\Controllers\Api\V1\PublicController;
+use App\Http\Controllers\Api\V1\SavingsRequestController;
+use App\Http\Controllers\Api\V1\PaymentRequestController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -47,6 +50,9 @@ Route::middleware('throttle:auth')->group(function (): void {
     Route::post('register', [AuthController::class, 'register'])->name('api.v1.register');
     Route::post('login', [AuthController::class, 'login'])->name('api.v1.login');
     Route::post('saccos/register', [SaccoRegistrationController::class, 'register'])->name('api.v1.saccos.register');
+    
+    // 2FA Challenge
+    Route::post('two-factor/challenge', [TwoFactorController::class, 'challenge'])->name('api.v1.two-factor.challenge');
     
     // Member registration via invite token
     Route::post('members/register', [\App\Http\Controllers\Api\V1\InvitationController::class, 'register'])->name('api.v1.members.register');
@@ -77,6 +83,12 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated'])->group(function ()
 
     // Change password
     Route::put('change-password', [AuthController::class, 'changePassword'])->name('api.v1.change-password');
+    
+    // Two-Factor Authentication (Personal)
+    Route::post('two-factor/enable', [TwoFactorController::class, 'enable'])->name('api.v1.two-factor.enable');
+    Route::post('two-factor/confirm', [TwoFactorController::class, 'confirm'])->name('api.v1.two-factor.confirm');
+    Route::delete('two-factor/disable', [TwoFactorController::class, 'disable'])->name('api.v1.two-factor.disable');
+    Route::get('two-factor/recovery-codes', [TwoFactorController::class, 'regenerateRecoveryCodes'])->name('api.v1.two-factor.recovery-codes');
     
     // Guarantor Search & Requests (accessible to members)
     Route::get('guarantors/search', [MemberController::class, 'searchGuarantors'])->name('api.v1.guarantors.search');
@@ -140,6 +152,8 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated', 'role:superadmin'])
         Route::get('users/{user}', [SuperadminUserController::class, 'show'])->name('api.v1.admin.users.show');
         Route::patch('users/{user}/suspend', [SuperadminUserController::class, 'suspend'])->name('api.v1.admin.users.suspend');
         Route::patch('users/{user}/activate', [SuperadminUserController::class, 'activate'])->name('api.v1.admin.users.activate');
+        Route::post('users/{user}/reset-password', [SuperadminUserController::class, 'resetPassword'])->name('api.v1.admin.users.reset-password');
+        Route::delete('users/{user}/two-factor', [SuperadminUserController::class, 'disableTwoFactor'])->name('api.v1.admin.users.disable-two-factor');
 
         // Platform Reports
         Route::get('reports/overview', [SuperadminReportsController::class, 'overview'])->name('api.v1.admin.reports.overview');
@@ -163,6 +177,7 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated', 'role:admin,sacco_a
 
         Route::apiResource('members', MemberController::class)->names('api.v1.members');
         Route::post('members/invite', [\App\Http\Controllers\Api\V1\InvitationController::class, 'invite'])->name('api.v1.members.invite');
+        Route::post('members/{member}/reset-password', [MemberController::class, 'resetPassword'])->name('api.v1.members.reset-password');
 
         Route::post('dividends/calculate', [DividendController::class, 'calculate'])->name('api.v1.dividends.calculate');
         Route::post('dividends/distribute', [DividendController::class, 'distribute'])->name('api.v1.dividends.distribute');
@@ -176,6 +191,18 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated', 'role:admin,sacco_a
 
         Route::post('repayments', [RepaymentController::class, 'store'])->name('api.v1.repayments.store');
         Route::get('repayments/overdue', [RepaymentController::class, 'overdue'])->name('api.v1.repayments.overdue');
+
+        // Savings Requests (Admin)
+        Route::get('savings-requests', [SavingsRequestController::class, 'indexAdmin'])->name('api.v1.savings-requests.index');
+        Route::get('savings-requests/{savingsRequest}', [SavingsRequestController::class, 'showAdmin'])->name('api.v1.savings-requests.show');
+        Route::patch('savings-requests/{id}/approve', [SavingsRequestController::class, 'approve'])->name('api.v1.savings-requests.approve');
+        Route::patch('savings-requests/{id}/reject', [SavingsRequestController::class, 'reject'])->name('api.v1.savings-requests.reject');
+
+        // Payment Requests (Admin)
+        Route::get('payment-requests', [PaymentRequestController::class, 'indexAdmin'])->name('api.v1.payment-requests.index');
+        Route::get('payment-requests/{paymentRequest}', [PaymentRequestController::class, 'showAdmin'])->name('api.v1.payment-requests.show');
+        Route::patch('payment-requests/{id}/approve', [PaymentRequestController::class, 'approve'])->name('api.v1.payment-requests.approve');
+        Route::patch('payment-requests/{id}/reject', [PaymentRequestController::class, 'reject'])->name('api.v1.payment-requests.reject');
     });
 
 // ─── Loan Endpoints ──────────────────────────────────────────────────
@@ -196,9 +223,20 @@ Route::post('loans/{loan}/repayments', [RepaymentController::class, 'store'])
 Route::middleware(['auth:sanctum', 'throttle:authenticated', 'role:member'])->group(function (): void {
     Route::post('loans', [LoanController::class, 'store'])->name('api.v1.loans.store');
     Route::get('me/loans', [LoanController::class, 'myLoans'])->name('api.v1.me.loans');
+
+    // Savings Requests (Member)
+    Route::post('me/savings-requests', [SavingsRequestController::class, 'store'])->name('api.v1.me.savings-requests.store');
+    Route::get('me/savings-requests', [SavingsRequestController::class, 'indexOwn'])->name('api.v1.me.savings-requests.index');
+    Route::get('me/savings-requests/{savingsRequest}', [SavingsRequestController::class, 'showOwn'])->name('api.v1.me.savings-requests.show');
+
+    // Payment Requests (Member)
+    Route::post('loans/{loan}/payment-requests', [PaymentRequestController::class, 'store'])->name('api.v1.loans.payment-requests.store');
+    Route::get('me/payment-requests', [PaymentRequestController::class, 'indexOwn'])->name('api.v1.me.payment-requests.index');
+    Route::get('me/payment-requests/{paymentRequest}', [PaymentRequestController::class, 'showOwn'])->name('api.v1.me.payment-requests.show');
 });
 
 Route::middleware(['auth:sanctum', 'throttle:authenticated'])->group(function (): void {
     Route::get('loans/{loan}', [LoanController::class, 'show'])->name('api.v1.loans.show');
     Route::get('loans/{loan}/repayments', [RepaymentController::class, 'index'])->name('api.v1.loans.repayments.index');
 });
+

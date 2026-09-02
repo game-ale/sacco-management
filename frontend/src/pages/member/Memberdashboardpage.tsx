@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -16,6 +16,8 @@ import api from "../../lib/api";
 import { useAuthStore } from "../../stores/auth";
 import { MetricCard } from "@/components/member/Metriccard ";
 
+import type { Loan, LoanSchedule } from "@/types";
+
 interface SavingsTransaction {
   id: number;
   type: "deposit" | "withdraw";
@@ -23,8 +25,6 @@ interface SavingsTransaction {
   balance_after: number;
   description: string | null;
   transaction_date: string;
-  // TODO: confirm these field names against your actual API response —
-  // added to support the Reference/Status columns in the reference design.
   reference?: string;
   status?: "completed" | "processing" | "failed";
 }
@@ -33,14 +33,6 @@ interface SavingsResponse {
   balance: number;
   change_percent?: number;
   transactions: SavingsTransaction[];
-}
-
-interface Loan {
-  id: number;
-  status: string;
-  outstanding_balance?: number;
-  next_due_date?: string;
-  next_due_amount?: number;
 }
 
 interface LoansResponse {
@@ -134,25 +126,99 @@ export const MemberDashboardPage: React.FC = () => {
     queryFn: fetchDividends,
   });
 
-  const activeLoans =
-    loans?.loans.filter(
-      (l) => l.status === "approved" || l.status === "disbursed",
+  const activeLoans = useMemo(() => {
+    return loans?.loans.filter(
+      (l: Loan) => l.status === "active" || l.status === "approved" || l.status === "disbursed"
     ) ?? [];
+  }, [loans?.loans]);
+
   const outstandingTotal = activeLoans.reduce(
-    (sum, l) => sum + Number(l.outstanding_balance ?? 0),
-    0,
+    (sum: number, l: Loan) => sum + Number(l.outstanding_balance ?? l.amount ?? 0),
+    0
   );
   const shareCapital =
     (shareInfo?.share_value ?? 0) * (shareInfo?.num_shares ?? 0);
 
-  // Nearest upcoming installment across active loans, if any.
-  const nextInstallment = activeLoans
-    .filter((l) => l.next_due_date && l.next_due_amount)
-    .sort(
-      (a, b) =>
-        new Date(a.next_due_date!).getTime() -
-        new Date(b.next_due_date!).getTime(),
-    )[0];
+  // Dynamic next installment calculation across all active loans
+  const upcomingInstallmentDetails = useMemo(() => {
+    let bestLoan: Loan | null = null;
+    let bestDueDate: Date | null = null;
+    let bestAmount = 0;
+    let bestDaysRemaining = 0;
+
+    for (const loan of activeLoans) {
+      if (loan.next_installment && loan.next_installment.due_date) {
+        const dueDate = new Date(loan.next_installment.due_date);
+        if (!bestDueDate || dueDate < bestDueDate) {
+          bestLoan = loan;
+          bestDueDate = dueDate;
+          bestAmount = loan.next_installment.amount_due;
+          bestDaysRemaining = loan.next_installment.remaining_days;
+        }
+      } else if (loan.next_due_date && loan.next_due_amount) {
+        const dueDate = new Date(loan.next_due_date);
+        if (!bestDueDate || dueDate < bestDueDate) {
+          bestLoan = loan;
+          bestDueDate = dueDate;
+          bestAmount = loan.next_due_amount;
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const dDate = new Date(dueDate);
+          dDate.setHours(0, 0, 0, 0);
+          bestDaysRemaining = Math.round((dDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        }
+      } else if (loan.repayment_schedule && loan.repayment_schedule.length > 0) {
+        const unpaidSchedules = loan.repayment_schedule
+          .filter((s: LoanSchedule) => s.status !== "paid")
+          .sort((a: LoanSchedule, b: LoanSchedule) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
+        if (unpaidSchedules.length > 0) {
+          const firstUnpaid = unpaidSchedules[0];
+          const dueDate = new Date(firstUnpaid.due_date);
+          if (!bestDueDate || dueDate < bestDueDate) {
+            bestLoan = loan;
+            bestDueDate = dueDate;
+            bestAmount = (firstUnpaid.total_due ?? firstUnpaid.amount_due ?? 0) - (firstUnpaid.amount_paid ?? 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const dDate = new Date(dueDate);
+            dDate.setHours(0, 0, 0, 0);
+            bestDaysRemaining = Math.round((dDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          }
+        }
+      }
+    }
+
+    if (!bestLoan || !bestDueDate) return null;
+
+    const formattedDate = bestDueDate.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+    let remainingBadgeText = "";
+    let isOverdue = false;
+    if (bestDaysRemaining > 1) {
+      remainingBadgeText = `${bestDaysRemaining} days remaining`;
+    } else if (bestDaysRemaining === 1) {
+      remainingBadgeText = `1 day remaining`;
+    } else if (bestDaysRemaining === 0) {
+      remainingBadgeText = `Due today`;
+    } else {
+      isOverdue = true;
+      remainingBadgeText = `${Math.abs(bestDaysRemaining)} ${Math.abs(bestDaysRemaining) === 1 ? "day" : "days"} overdue`;
+    }
+
+    return {
+      loan: bestLoan,
+      dueDate: bestDueDate,
+      formattedDate,
+      amount: bestAmount,
+      daysRemaining: bestDaysRemaining,
+      remainingBadgeText,
+      isOverdue,
+    };
+  }, [activeLoans]);
 
   return (
     <div className="space-y-6">
@@ -232,43 +298,76 @@ export const MemberDashboardPage: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Next Installment Due */}
-        <div className="lg:col-span-2 bg-[#FFF1F0] dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 rounded-xl p-5 flex items-center justify-between gap-4 flex-wrap">
+        <div
+          className={`lg:col-span-2 rounded-xl p-5 border flex items-center justify-between gap-4 flex-wrap transition-colors ${
+            upcomingInstallmentDetails
+              ? upcomingInstallmentDetails.isOverdue
+                ? "bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/50"
+                : "bg-amber-50/70 dark:bg-amber-950/20 border-amber-200/80 dark:border-amber-900/40"
+              : "bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800"
+          }`}
+        >
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 shrink-0">
+            <div
+              className={`p-2.5 rounded-full shrink-0 ${
+                upcomingInstallmentDetails
+                  ? upcomingInstallmentDetails.isOverdue
+                    ? "bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400"
+                    : "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400"
+                  : "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400"
+              }`}
+            >
               <AlertCircle className="w-5 h-5" />
             </div>
             <div>
               <h2 className="font-semibold text-slate-900 dark:text-white">
                 {t("member.dashboard.next_installment")}
               </h2>
-              {nextInstallment ? (
+              {upcomingInstallmentDetails ? (
                 <>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                    {t("member.dashboard.installment_notice")}
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {upcomingInstallmentDetails.loan.loan_number
+                      ? `Loan #${upcomingInstallmentDetails.loan.loan_number}`
+                      : t("member.dashboard.installment_notice")}
                   </p>
-                  <div className="mt-2 flex items-baseline gap-3">
-                    <span className="text-2xl font-bold text-rose-600 dark:text-rose-400">
-                      ETB {nextInstallment.next_due_amount!.toLocaleString()}
+                  <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span className="text-2xl font-bold text-slate-900 dark:text-white">
+                      ETB {upcomingInstallmentDetails.amount.toLocaleString()}
                     </span>
-                    <span className="text-xs text-slate-400 dark:text-slate-500">
-                      {t("member.dashboard.due")}{" "}
-                      {new Date(
-                        nextInstallment.next_due_date!,
-                      ).toLocaleDateString()}
-                    </span>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-slate-500 dark:text-slate-400">
+                        {t("member.dashboard.due")} {upcomingInstallmentDetails.formattedDate}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full font-semibold text-[11px] ${
+                          upcomingInstallmentDetails.isOverdue
+                            ? "bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300"
+                            : upcomingInstallmentDetails.daysRemaining === 0
+                            ? "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300"
+                            : "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
+                        }`}
+                      >
+                        {upcomingInstallmentDetails.remainingBadgeText}
+                      </span>
+                    </div>
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                  {t("member.dashboard.no_installment_due")}
-                </p>
+                <div className="mt-1">
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    {t("member.dashboard.no_installment_due")}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    You have no active loans or upcoming payment installments at this time.
+                  </p>
+                </div>
               )}
             </div>
           </div>
-          {nextInstallment && (
+          {upcomingInstallmentDetails && (
             <Link
               to="/member/payments"
-              className="bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold py-2 px-5 rounded-lg shrink-0"
+              className="bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold py-2.5 px-5 rounded-lg shrink-0 transition-colors shadow-sm"
             >
               {t("member.dashboard.pay_now")}
             </Link>

@@ -11,6 +11,22 @@ export interface MemberSavingsTransaction {
   date: string | null;
 }
 
+export interface SavingsRequestItem {
+  id: number;
+  sacco_id: number;
+  member_id: number;
+  type: "deposit" | "withdraw";
+  amount: number;
+  description: string | null;
+  status: "pending" | "approved" | "rejected";
+  reviewed_by: number | null;
+  reviewed_at: string | null;
+  rejection_reason: string | null;
+  created_at: string;
+  member?: { id: number; name: string; email: string };
+  reviewer?: { id: number; name: string };
+}
+
 export interface MemberSavingsPage {
   balance: number;
   transactions: MemberSavingsTransaction[];
@@ -52,4 +68,27 @@ export async function getMemberSavings(page = 1): Promise<MemberSavingsPage> {
       total: transactions?.meta?.total ?? 0,
     },
   };
+}
+
+export async function createSavingsRequest(payload: {
+  type: "deposit" | "withdraw";
+  amount: number;
+  description?: string;
+}): Promise<SavingsRequestItem> {
+  const { data } = await api.post<{ data: SavingsRequestItem }>(
+    "/me/savings-requests",
+    payload,
+  );
+  return data.data;
+}
+
+export async function getMySavingsRequests(page = 1): Promise<{
+  data: SavingsRequestItem[];
+  meta?: { current_page?: number; last_page?: number; total?: number };
+}> {
+  const { data } = await api.get<{
+    data: SavingsRequestItem[];
+    meta?: { current_page?: number; last_page?: number; total?: number };
+  }>("/me/savings-requests", { params: { page } });
+  return data;
 }

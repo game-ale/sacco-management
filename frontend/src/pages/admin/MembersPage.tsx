@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { 
   UserPlus, Search, Filter, 
-  Eye, Edit, Trash2, ChevronLeft, ChevronRight, X, Loader2
+  Eye, Edit, Trash2, ChevronLeft, ChevronRight, X, Loader2, Key
 } from 'lucide-react'
 import { adminService } from '../../services/adminService'
 import type { User } from '../../types'
@@ -22,12 +22,24 @@ export const MembersPage: React.FC = () => {
   const [viewMember, setViewMember] = useState<User | null>(null)
   const [editMember, setEditMember] = useState<User | null>(null)
   const [deleteMemberId, setDeleteMemberId] = useState<number | null>(null)
+  const [resetPasswordMember, setResetPasswordMember] = useState<User | null>(null)
+  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null)
 
   // Form states
+  const [activeTab, setActiveTab] = useState<'invite' | 'manual'>('invite')
+  
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteLink, setInviteLink] = useState<string | null>(null)
+  const [inviteError, setInviteError] = useState<string | null>(null)
+
   const [addFormData, setAddFormData] = useState({
     name: '',
     email: '',
     phone: '',
+    national_id: '',
+    region: '',
+    zone: '',
+    town: '',
     num_shares: 1,
     username: '',
     password: ''
@@ -63,12 +75,28 @@ export const MembersPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminMembers'] })
       setIsAddModalOpen(false)
-      setAddFormData({ name: '', email: '', phone: '', num_shares: 1, username: '', password: '' })
+      setAddFormData({ name: '', email: '', phone: '', national_id: '', region: '', zone: '', town: '', num_shares: 1, username: '', password: '' })
       setAddError(null)
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message || 'Failed to create member.'
       setAddError(msg)
+    }
+  })
+
+  // Invite Member Mutation
+  const inviteMutation = useMutation({
+    mutationFn: (email: string) => adminService.inviteMember({ email }),
+    onSuccess: (data) => {
+      const token = data?.data?.token
+      if (token) {
+        setInviteLink(`${window.location.origin}/member/accept-invite?token=${token}`)
+      }
+      setInviteError(null)
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || 'Failed to send invitation.'
+      setInviteError(msg)
     }
   })
 
@@ -98,6 +126,17 @@ export const MembersPage: React.FC = () => {
     }
   })
 
+  // Reset Password Mutation
+  const resetPasswordMutation = useMutation({
+    mutationFn: (id: number) => adminService.resetMemberPassword(id),
+    onSuccess: (data) => {
+      setTemporaryPassword(data?.data?.temporary_password)
+    },
+    onError: (err: any) => {
+      alert(err?.response?.data?.message || 'Failed to reset password.')
+    }
+  })
+
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setAddError(null)
@@ -105,10 +144,20 @@ export const MembersPage: React.FC = () => {
       name: addFormData.name,
       email: addFormData.email,
       phone: addFormData.phone || undefined,
+      national_id: addFormData.national_id || undefined,
+      region: addFormData.region || undefined,
+      zone: addFormData.zone || undefined,
+      town: addFormData.town || undefined,
       num_shares: Number(addFormData.num_shares) || 1,
       username: addFormData.username || undefined,
       password: addFormData.password || undefined,
     })
+  }
+
+  const handleInviteSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setInviteError(null)
+    inviteMutation.mutate(inviteEmail)
   }
 
   const handleEditSubmit = (e: React.FormEvent) => {
@@ -292,6 +341,13 @@ export const MembersPage: React.FC = () => {
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
+                          <button 
+                            onClick={() => setResetPasswordMember(member)}
+                            className="p-1.5 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors" 
+                            title="Reset Password"
+                          >
+                            <Key className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -333,83 +389,238 @@ export const MembersPage: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Add Member Modal */}
-      <Dialog.Root open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+      {/* Add / Invite Member Modal */}
+      <Dialog.Root open={isAddModalOpen} onOpenChange={(open) => {
+        setIsAddModalOpen(open)
+        if (!open) {
+          setInviteLink(null)
+          setInviteError(null)
+          setAddError(null)
+          setInviteEmail('')
+        }
+      }}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 transition-opacity" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800">
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
               <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">Add New Member</Dialog.Title>
               <Dialog.Close className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 transition-colors">
                 <X className="w-5 h-5" />
               </Dialog.Close>
             </div>
             
-            <form onSubmit={handleAddSubmit} className="p-6 space-y-4">
-              {addError && (
-                <div className="p-3 text-xs bg-rose-50 border border-rose-200 text-rose-600 rounded-lg">
-                  {addError}
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Full Name <span className="text-rose-500">*</span></label>
-                <input 
-                  type="text" 
-                  value={addFormData.name}
-                  onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
-                  className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] transition-colors" 
-                  placeholder="e.g. Abebe Bekele" 
-                  required 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address <span className="text-rose-500">*</span></label>
-                <input 
-                  type="email" 
-                  value={addFormData.email}
-                  onChange={(e) => setAddFormData({ ...addFormData, email: e.target.value })}
-                  className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] transition-colors" 
-                  placeholder="abebe@example.com" 
-                  required 
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Phone Number</label>
-                  <input 
-                    type="tel" 
-                    value={addFormData.phone}
-                    onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] transition-colors" 
-                    placeholder="+251..." 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Initial Shares</label>
-                  <input 
-                    type="number" 
-                    min={0}
-                    value={addFormData.num_shares}
-                    onChange={(e) => setAddFormData({ ...addFormData, num_shares: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] transition-colors" 
-                  />
-                </div>
-              </div>
+            {/* Tabs */}
+            <div className="flex border-b border-slate-200 dark:border-slate-800 shrink-0">
+              <button 
+                className={`flex-1 py-3 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'invite' ? 'border-[#0B6B3A] text-[#0B6B3A]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                onClick={() => setActiveTab('invite')}
+              >
+                Send Invitation
+              </button>
+              <button 
+                className={`flex-1 py-3 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'manual' ? 'border-[#0B6B3A] text-[#0B6B3A]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                onClick={() => setActiveTab('manual')}
+              >
+                Add Manually
+              </button>
+            </div>
 
-              <div className="pt-4 mt-2 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
-                <Dialog.Close type="button" className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                  Cancel
-                </Dialog.Close>
-                <button 
-                  type="submit" 
-                  disabled={createMutation.isPending}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#0B6B3A] text-white rounded-lg text-sm font-semibold hover:bg-[#095730] transition-colors disabled:opacity-50"
-                >
-                  {createMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {createMutation.isPending ? 'Adding...' : 'Add Member'}
-                </button>
-              </div>
-            </form>
+            <div className="overflow-y-auto p-6">
+              {activeTab === 'invite' ? (
+                inviteLink ? (
+                  <div className="space-y-4 text-center">
+                    <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+                      <UserPlus className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">Invitation Generated!</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Copy the link below and share it with the member so they can complete their registration.</p>
+                    </div>
+                    <div className="flex items-center gap-2 mt-4">
+                      <input 
+                        type="text" 
+                        readOnly 
+                        value={inviteLink}
+                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg text-sm"
+                      />
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(inviteLink)
+                          alert('Copied to clipboard!')
+                        }}
+                        className="px-4 py-2 bg-[#0B6B3A] text-white rounded-lg text-sm font-semibold hover:bg-[#095730] transition-colors shrink-0"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                    <div className="pt-4">
+                      <Dialog.Close className="w-full px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        Done
+                      </Dialog.Close>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleInviteSubmit} className="space-y-4">
+                    {inviteError && (
+                      <div className="p-3 text-xs bg-rose-50 border border-rose-200 text-rose-600 rounded-lg">
+                        {inviteError}
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address <span className="text-rose-500">*</span></label>
+                      <input 
+                        type="email" 
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] transition-colors" 
+                        placeholder="member@example.com" 
+                        required 
+                      />
+                      <p className="text-xs text-slate-500 mt-2">An invitation link will be generated for this email address.</p>
+                    </div>
+                    <div className="pt-4 mt-2 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+                      <Dialog.Close type="button" className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                        Cancel
+                      </Dialog.Close>
+                      <button 
+                        type="submit" 
+                        disabled={inviteMutation.isPending}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#0B6B3A] text-white rounded-lg text-sm font-semibold hover:bg-[#095730] transition-colors disabled:opacity-50"
+                      >
+                        {inviteMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {inviteMutation.isPending ? 'Generating...' : 'Generate Invite Link'}
+                      </button>
+                    </div>
+                  </form>
+                )
+              ) : (
+                <form onSubmit={handleAddSubmit} className="space-y-4">
+                  {addError && (
+                    <div className="p-3 text-xs bg-rose-50 border border-rose-200 text-rose-600 rounded-lg">
+                      {addError}
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Full Name <span className="text-rose-500">*</span></label>
+                      <input 
+                        type="text" 
+                        value={addFormData.name}
+                        onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A]" 
+                        required 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Username</label>
+                      <input 
+                        type="text" 
+                        value={addFormData.username}
+                        onChange={(e) => setAddFormData({ ...addFormData, username: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A]" 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address <span className="text-rose-500">*</span></label>
+                      <input 
+                        type="email" 
+                        value={addFormData.email}
+                        onChange={(e) => setAddFormData({ ...addFormData, email: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A]" 
+                        required 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Phone Number</label>
+                      <input 
+                        type="tel" 
+                        value={addFormData.phone}
+                        onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A]" 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">National ID</label>
+                      <input 
+                        type="text" 
+                        value={addFormData.national_id}
+                        onChange={(e) => setAddFormData({ ...addFormData, national_id: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A]" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Region</label>
+                      <input 
+                        type="text" 
+                        value={addFormData.region}
+                        onChange={(e) => setAddFormData({ ...addFormData, region: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A]" 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Zone</label>
+                      <input 
+                        type="text" 
+                        value={addFormData.zone}
+                        onChange={(e) => setAddFormData({ ...addFormData, zone: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A]" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Town/City</label>
+                      <input 
+                        type="text" 
+                        value={addFormData.town}
+                        onChange={(e) => setAddFormData({ ...addFormData, town: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A]" 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Initial Shares</label>
+                      <input 
+                        type="number" 
+                        min={0}
+                        value={addFormData.num_shares}
+                        onChange={(e) => setAddFormData({ ...addFormData, num_shares: parseInt(e.target.value) || 0 })}
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A]" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Password</label>
+                      <input 
+                        type="password" 
+                        value={addFormData.password}
+                        onChange={(e) => setAddFormData({ ...addFormData, password: e.target.value })}
+                        placeholder="Leave empty for default"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A]" 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-2 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+                    <Dialog.Close type="button" className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                      Cancel
+                    </Dialog.Close>
+                    <button 
+                      type="submit" 
+                      disabled={createMutation.isPending}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#0B6B3A] text-white rounded-lg text-sm font-semibold hover:bg-[#095730] transition-colors disabled:opacity-50"
+                    >
+                      {createMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                      {createMutation.isPending ? 'Adding...' : 'Add Member Manually'}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
@@ -596,6 +807,95 @@ export const MembersPage: React.FC = () => {
                 {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
               </button>
             </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+
+      {/* Reset Password Modal */}
+      <Dialog.Root open={!!resetPasswordMember} onOpenChange={(open) => {
+        if (!open) {
+          setResetPasswordMember(null)
+          setTemporaryPassword(null)
+        }
+      }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 transition-opacity" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800 p-6 space-y-4 text-center">
+            <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
+              <Key className="w-6 h-6" />
+            </div>
+            
+            {!temporaryPassword ? (
+              <>
+                <div>
+                  <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">Reset Password</Dialog.Title>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
+                    Are you sure you want to reset the password for <strong>{resetPasswordMember?.name}</strong>?
+                    They will be forced to change this temporary password upon their next login.
+                  </p>
+                </div>
+                <div className="flex justify-center gap-3 pt-2">
+                  <button 
+                    type="button" 
+                    onClick={() => setResetPasswordMember(null)}
+                    className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="button"
+                    disabled={resetPasswordMutation.isPending}
+                    onClick={() => resetPasswordMember && resetPasswordMutation.mutate(resetPasswordMember.id)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-700 disabled:opacity-50"
+                  >
+                    {resetPasswordMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {resetPasswordMutation.isPending ? 'Resetting...' : 'Reset Password'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="space-y-4"
+              >
+                <div>
+                  <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">Password Reset Successful</Dialog.Title>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
+                    Please securely share this temporary password with the user.
+                  </p>
+                </div>
+                
+                <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 block">Temporary Password</span>
+                  <code className="text-xl font-mono font-bold text-slate-900 dark:text-emerald-400">
+                    {temporaryPassword}
+                  </code>
+                </div>
+
+                <div className="flex justify-center gap-3 pt-2">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(temporaryPassword)
+                    }}
+                    className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-sm font-semibold transition-colors"
+                  >
+                    Copy
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setResetPasswordMember(null)
+                      setTemporaryPassword(null)
+                    }}
+                    className="flex-1 px-4 py-2 bg-[#0B6B3A] hover:bg-[#095730] text-white rounded-lg text-sm font-semibold transition-colors"
+                  >
+                    Done
+                  </button>
+                </div>
+              </motion.div>
+            )}
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>

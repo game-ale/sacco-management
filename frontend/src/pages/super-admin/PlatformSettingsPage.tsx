@@ -7,12 +7,17 @@ import { toast } from 'sonner'
 import { 
   Save, 
   ShieldCheck, 
+  Shield,
   Building2, 
   Bell, 
   Palette 
 } from 'lucide-react'
 import { platformSettingsService } from '../../services/platformSettingsService'
 import type { PlatformSetting } from '../../types'
+import { useAuthStore } from '../../stores/auth'
+import { authService } from '../../services/authService'
+import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 
 const settingsSchema = z.object({
   auto_approve_saccos: z.boolean(),
@@ -34,6 +39,12 @@ type SettingsFormData = z.infer<typeof settingsSchema>
 
 export const PlatformSettingsPage: React.FC = () => {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const { user, getProfile } = useAuthStore()
+  
+  const [disablePassword, setDisablePassword] = useState('')
+  const [isDisabling, setIsDisabling] = useState(false)
+  const [showDisableConfirm, setShowDisableConfirm] = useState(false)
 
   const { data, isLoading } = useQuery({
     queryKey: ['platform-settings'],
@@ -81,6 +92,27 @@ export const PlatformSettingsPage: React.FC = () => {
       terms_of_service_url: values.terms_of_service_url || null,
       privacy_policy_url: values.privacy_policy_url || null,
     })
+  }
+
+  const handleDisable2FA = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!disablePassword) {
+      toast.error("Password is required")
+      return
+    }
+    
+    setIsDisabling(true)
+    try {
+      await authService.disableTwoFactor(disablePassword)
+      toast.success("Two-factor authentication disabled successfully")
+      await getProfile()
+      setShowDisableConfirm(false)
+      setDisablePassword('')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to disable 2FA. Check your password.")
+    } finally {
+      setIsDisabling(false)
+    }
   }
 
   if (isLoading) {
@@ -197,6 +229,80 @@ export const PlatformSettingsPage: React.FC = () => {
               />
               {errors.default_loan_to_savings_ratio && <p className="text-xs text-rose-500 mt-1">{errors.default_loan_to_savings_ratio.message}</p>}
             </div>
+          </div>
+        </div>
+        
+        {/* Security / 2FA */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
+          <div className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center gap-3">
+            <Shield className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">Account Security</h2>
+          </div>
+          <div className="p-6">
+            {user?.two_factor_confirmed_at ? (
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
+                  <Shield className="w-5 h-5 shrink-0" />
+                  <span className="font-medium text-sm">Two-factor authentication is currently enabled.</span>
+                </div>
+                
+                {!showDisableConfirm ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowDisableConfirm(true)}
+                    className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-lg transition-colors"
+                  >
+                    Disable Two-Factor Authentication
+                  </button>
+                ) : (
+                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700 space-y-4">
+                    <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">Please enter your password to confirm disabling 2FA.</p>
+                    <div>
+                      <input
+                        type="password"
+                        placeholder="Current Password"
+                        value={disablePassword}
+                        onChange={(e) => setDisablePassword(e.target.value)}
+                        className="w-full max-w-sm px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500"
+                      />
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={handleDisable2FA}
+                        disabled={isDisabling || !disablePassword}
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+                      >
+                        {isDisabling ? "Disabling..." : "Confirm Disable"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowDisableConfirm(false)
+                          setDisablePassword('')
+                        }}
+                        className="px-4 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-lg text-sm font-medium transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+                  Add additional security to your superadmin account by enabling Two-Factor Authentication (2FA).
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate('/super-admin/two-factor-setup')}
+                  className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-sm font-bold shadow-sm transition-colors hover:bg-slate-800 dark:hover:bg-slate-100"
+                >
+                  Enable Two-Factor Authentication
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

@@ -33,6 +33,7 @@ export default function LoginPage() {
   const loginSchema = z.object({
     login: z.string().min(1, t("auth.emailRequired")),
     password: z.string().min(1, t("auth.passwordRequired")),
+    remember_me: z.boolean().optional(),
   });
 
   type LoginForm = z.infer<typeof loginSchema>;
@@ -48,8 +49,17 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     try {
       await login(data);
+      
+      const authState = useAuthStore.getState();
+      
+      if (authState.isTwoFactorPending) {
+        navigate("/two-factor-challenge");
+        return;
+      }
+
       toast.success("Logged in successfully");
-      const loggedInUser = useAuthStore.getState().user;
+      const loggedInUser = authState.user;
+      
       if (loggedInUser?.role === "superadmin") {
         navigate("/super-admin");
       } else if (loggedInUser?.role === "admin") {
@@ -228,6 +238,7 @@ export default function LoginPage() {
                 <input
                   type="checkbox"
                   className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-[#0B6B3A] focus:ring-[#0B6B3A] focus:ring-offset-0 transition-all cursor-pointer dark:bg-slate-800"
+                  {...register("remember_me")}
                 />
                 <span className="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
                   Remember me
