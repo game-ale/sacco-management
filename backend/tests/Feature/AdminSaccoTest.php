@@ -4,7 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Sacco;
 use App\Models\User;
+use App\Notifications\SaccoApplicationStatusNotification;
+use App\Notifications\SaccoRegistrationSubmittedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class AdminSaccoTest extends TestCase
@@ -192,5 +195,65 @@ class AdminSaccoTest extends TestCase
             ->patchJson("/api/v1/admin/saccos/{$this->approvedSacco->id}/reject");
 
         $response->assertStatus(422);
+    }
+
+    // ─── Notification Tests ───────────────────────────────────────────
+
+    public function test_superadmin_receives_notification_when_sacco_registration_submitted(): void
+    {
+        Notification::fake();
+
+        $superadmin = User::factory()->create([
+            'role' => 'superadmin',
+            'sacco_id' => null,
+        ]);
+
+        $response = $this->postJson('/api/v1/saccos/register', [
+            'sacco_name' => 'Northern Growth SACCO',
+            'registration_number' => 'NG-2026-001',
+            'admin_name' => 'Jane Admin',
+            'admin_email' => 'jane.admin@example.com',
+            'admin_username' => 'janeadmin',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+            'national_id' => '123456789',
+            'region' => 'Nairobi',
+            'zone' => 'Zone 1',
+            'town' => 'Nairobi',
+        ]);
+
+        $response->assertStatus(201);
+
+        Notification::assertSentTo(
+            $superadmin,
+            SaccoRegistrationSubmittedNotification::class,
+            function ($notification) {
+                return $notification->sacco->name === 'Northern Growth SACCO';
+            }
+        );
+    }
+
+    public function test_sacco_admin_receives_status_notification_on_approval(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'sacco_id' => $this->pendingSacco->id,
+        ]);
+
+        $response = $this->actingAs($this->superadmin)
+            ->patchJson("/api/v1/admin/saccos/{$this->pendingSacco->id}/approve");
+
+        $response->assertStatus(200);
+
+        Notification::assertSentTo(
+            $admin,
+            SaccoApplicationStatusNotification::class,
+            function ($notification) {
+                return $notification->status === 'approved'
+                    && $notification->sacco->id === $this->pendingSacco->id;
+            }
+        );
     }
 }

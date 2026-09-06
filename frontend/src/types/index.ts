@@ -71,7 +71,55 @@ export interface Sacco {
   registration_number: string
   status: 'pending' | 'approved' | 'rejected' | 'suspended'
   rejection_reason?: string | null
+  is_public?: boolean
+  is_accepting_members?: boolean
+  show_share_info?: boolean
+  is_directory_allowed?: boolean
+  logo_path?: string | null
+  description?: string | null
+  location?: string | null
+  category?: string | null
+  eligibility_criteria?: string | null
+  contact_email?: string | null
+  contact_phone?: string | null
+  min_shares?: number
   members_count?: number
+  created_at: string
+  updated_at: string
+}
+
+export interface PublicSacco {
+  id: number
+  name: string
+  logo_path?: string | null
+  description?: string | null
+  location?: string | null
+  category?: string | null
+  eligibility_criteria?: string | null
+  is_accepting_members: boolean
+  contact_email?: string | null
+  contact_phone?: string | null
+  members_count?: number
+  show_share_info: boolean
+  share_value?: number | null
+  min_shares?: number | null
+  min_share_purchase_amount?: number | null
+}
+
+export interface MembershipRequest {
+  id: number
+  sacco_id: number
+  sacco_name?: string | null
+  full_name: string
+  email: string
+  phone_number: string
+  national_id?: string | null
+  message?: string | null
+  status: 'pending' | 'approved' | 'rejected'
+  rejection_reason?: string | null
+  reviewed_by?: number | null
+  reviewer_name?: string | null
+  reviewed_at?: string | null
   created_at: string
   updated_at: string
 }

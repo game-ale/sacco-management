@@ -96,4 +96,15 @@ export const adminSaccoService = {
     const response = await api.post('/saccos/register', payload)
     return response.data
   },
+
+  toggleDirectoryAllowance: async (
+    id: string | number,
+    isDirectoryAllowed: boolean
+  ): Promise<{ success?: boolean; message?: string; data: Sacco }> => {
+    const response = await api.patch<{ success?: boolean; message?: string; data: Sacco }>(
+      `/admin/saccos/${id}/directory-allowance`,
+      { is_directory_allowed: isDirectoryAllowed }
+    )
+    return response.data
+  },
 }

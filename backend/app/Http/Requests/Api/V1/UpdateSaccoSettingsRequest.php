@@ -35,6 +35,17 @@ class UpdateSaccoSettingsRequest extends FormRequest
             'loan_to_savings_ratio' => ['sometimes', 'numeric', 'min:0'],
             'min_shares_per_member' => ['sometimes', 'integer', 'min:0'],
             'late_fee_percentage' => ['sometimes', 'numeric', 'min:0', 'max:100'],
+            'is_public' => ['sometimes', 'boolean'],
+            'is_accepting_members' => ['sometimes', 'boolean'],
+            'show_share_info' => ['sometimes', 'boolean'],
+            'logo_path' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'description' => ['sometimes', 'nullable', 'string'],
+            'location' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'category' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'eligibility_criteria' => ['sometimes', 'nullable', 'string'],
+            'contact_email' => ['sometimes', 'nullable', 'email', 'max:255'],
+            'contact_phone' => ['sometimes', 'nullable', 'string', 'max:50'],
+            'min_shares' => ['sometimes', 'integer', 'min:1'],
         ];
     }
 }

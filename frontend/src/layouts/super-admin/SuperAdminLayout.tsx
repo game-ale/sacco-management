@@ -7,8 +7,6 @@ import {
   BarChart3,
   Settings,
   HelpCircle,
-  Search,
-  Bell,
   Plus,
   Menu,
   X,
@@ -16,6 +14,8 @@ import {
 import { useAuthStore } from "../../stores/auth";
 import { NewSaccoModal } from "../../components/super-admin/NewSaccoModal";
 import ThemeToggle from "../../components/ThemeToggle";
+import { NotificationDropdown } from "../../components/admin/NotificationDropdown";
+import { SuperAdminGlobalSearch } from "../../components/super-admin/SuperAdminGlobalSearch";
 
 export const SuperAdminLayout: React.FC = () => {
   const location = useLocation();
@@ -190,26 +190,14 @@ export const SuperAdminLayout: React.FC = () => {
             {/* Theme Toggle */}
             <ThemeToggle />
 
-            {/* Search Input */}
-            <div className="relative hidden lg:block w-64">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full pl-9 pr-4 py-1.5 bg-[#F1F5F9] dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-full text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:bg-white dark:focus:bg-slate-900 transition-all"
-              />
-            </div>
+            <SuperAdminGlobalSearch />
 
-            {/* Icons */}
-            <button
-              className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full relative transition-colors"
-              title="Notifications"
-            >
-              <Bell className="w-5 h-5" />
-              <span className="w-2 h-2 bg-rose-500 rounded-full absolute top-1.5 right-1.5 ring-2 ring-white dark:ring-slate-900"></span>
-            </button>
+            <NotificationDropdown />
 
             <button
+              type="button"
+              onClick={() => navigate('/super-admin/help-support')}
+              aria-label="Help & Support"
               className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors hidden sm:block"
               title="Help & Support"
             >

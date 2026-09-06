@@ -8,10 +8,12 @@ use App\Http\Resources\V1\AuthResource;
 use App\Http\Traits\ApiResponse;
 use App\Models\Sacco;
 use App\Models\User;
+use App\Notifications\SaccoRegistrationSubmittedNotification;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 
 class SaccoRegistrationController extends Controller
 {
@@ -54,6 +56,11 @@ class SaccoRegistrationController extends Controller
                     $user->sendEmailVerificationNotification();
                 } catch (\Throwable $e) {
                     \Illuminate\Support\Facades\Log::warning('Verification email sending failed: ' . $e->getMessage());
+                }
+
+                $superAdmins = User::where('role', 'superadmin')->get();
+                if ($superAdmins->isNotEmpty()) {
+                    Notification::send($superAdmins, new SaccoRegistrationSubmittedNotification($sacco, $user));
                 }
 
                 // 3. Return auth token for the new admin

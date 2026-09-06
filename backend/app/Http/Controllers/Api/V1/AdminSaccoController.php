@@ -15,6 +15,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Notifications\SaccoApplicationStatusNotification;
+use Illuminate\Support\Facades\Notification;
 
 class AdminSaccoController extends Controller
 {
@@ -221,6 +223,11 @@ class AdminSaccoController extends Controller
 
         $sacco->update(['status' => 'approved']);
 
+        $admin = $sacco->users()->where('role', 'admin')->first();
+        if ($admin) {
+            Notification::send($admin, new SaccoApplicationStatusNotification($sacco, 'approved'));
+        }
+
         return $this->success(
             SaccoResource::make($sacco->loadCount('users')),
             'SACCO has been approved successfully.'
@@ -251,6 +258,11 @@ class AdminSaccoController extends Controller
             'status' => 'rejected',
             'rejection_reason' => is_string($rejectionReason) ? $rejectionReason : null,
         ]);
+
+        $admin = $sacco->users()->where('role', 'admin')->first();
+        if ($admin) {
+            Notification::send($admin, new SaccoApplicationStatusNotification($sacco, 'rejected'));
+        }
 
         return $this->success(
             SaccoResource::make($sacco->loadCount('users')),
@@ -336,6 +348,25 @@ class AdminSaccoController extends Controller
         return $this->success(
             SaccoResource::make($sacco->loadCount('users')),
             'SACCO has been reactivated.'
+        );
+    }
+
+    /**
+     * Toggle directory allowance for a SACCO (Super Admin).
+     */
+    public function toggleDirectoryAllowance(Request $request, Sacco $sacco): JsonResponse
+    {
+        $validated = $request->validate([
+            'is_directory_allowed' => ['required', 'boolean'],
+        ]);
+
+        $sacco->update([
+            'is_directory_allowed' => $validated['is_directory_allowed'],
+        ]);
+
+        return $this->success(
+            SaccoResource::make($sacco->loadCount('users')),
+            'SACCO directory allowance updated successfully.'
         );
     }
 }

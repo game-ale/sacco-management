@@ -7,13 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @property-read int $id
- * @property-read string $name
- * @property-read string $registration_number
- * @property-read string $status
- * @property-read string|null $rejection_reason
- * @property-read Carbon|null $created_at
- * @property-read Carbon|null $updated_at
+ * @mixin \App\Models\Sacco
  */
 class SaccoResource extends JsonResource
 {
@@ -30,6 +24,9 @@ class SaccoResource extends JsonResource
             'registration_number' => $this->registration_number,
             'status' => $this->status,
             'rejection_reason' => $this->rejection_reason,
+            'is_public' => (bool) $this->is_public,
+            'is_accepting_members' => (bool) $this->is_accepting_members,
+            'is_directory_allowed' => (bool) $this->is_directory_allowed,
             'members_count' => $this->whenCounted('users'),
             'created_at' => $this->created_at?->toDateTimeString(),
             'updated_at' => $this->updated_at?->toDateTimeString(),

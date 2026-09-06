@@ -13,6 +13,7 @@ export default function PublicLayout() {
     { name: "Home", path: "/" },
     { name: "About", path: "/about" },
     { name: "Services", path: "/services" },
+    { name: "Find SACCOs", path: "/saccos" },
     { name: "Contact", path: "/contact" },
   ];
 

@@ -7,12 +7,40 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
- * @property string $status
  * @property int $id
  * @property string $name
+ * @property string|null $registration_number
+ * @property string $status
+ * @property string|null $rejection_reason
+ * @property float|string $share_value
+ * @property string|null $currency
+ * @property string|null $email
+ * @property string|null $phone
+ * @property string|null $address
  * @property string|null $region
+ * @property float|string $default_interest_rate
+ * @property float|string $max_loan_amount
+ * @property int $max_loan_term
+ * @property float|string $loan_to_savings_ratio
+ * @property int $min_shares_per_member
+ * @property float|string $late_fee_percentage
+ * @property bool $is_public
+ * @property bool $is_accepting_members
+ * @property bool $show_share_info
+ * @property bool $is_directory_allowed
+ * @property string|null $logo_path
+ * @property string|null $description
+ * @property string|null $location
+ * @property string|null $category
+ * @property string|null $eligibility_criteria
+ * @property string|null $contact_email
+ * @property string|null $contact_phone
+ * @property int $min_shares
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
  * @property-read int|null $members_count
  * @property-read int|null $active_loans_count
+ * @property-read int|null $users_count
  */
 class Sacco extends Model
 {
@@ -34,6 +62,19 @@ class Sacco extends Model
         'min_shares_per_member',
         'loan_savings_multiplier',
         'late_fee_percentage',
+        // Public profile fields
+        'is_public',
+        'is_accepting_members',
+        'show_share_info',
+        'is_directory_allowed',
+        'logo_path',
+        'description',
+        'location',
+        'category',
+        'eligibility_criteria',
+        'contact_email',
+        'contact_phone',
+        'min_shares',
     ];
 
     /**
@@ -51,6 +92,11 @@ class Sacco extends Model
             'loan_to_savings_ratio' => 'decimal:2',
             'min_shares_per_member' => 'integer',
             'late_fee_percentage' => 'decimal:2',
+            'is_public' => 'boolean',
+            'is_accepting_members' => 'boolean',
+            'show_share_info' => 'boolean',
+            'is_directory_allowed' => 'boolean',
+            'min_shares' => 'integer',
         ];
     }
 
@@ -92,5 +138,13 @@ class Sacco extends Model
     public function dividends(): HasMany
     {
         return $this->hasMany(Dividend::class);
+    }
+
+    /**
+     * @return HasMany<MembershipRequest, $this>
+     */
+    public function membershipRequests(): HasMany
+    {
+        return $this->hasMany(MembershipRequest::class);
     }
 }

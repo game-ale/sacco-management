@@ -51,7 +51,10 @@ export const SettingsPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    const data = Object.fromEntries(formData as any)
+    const data: Record<string, any> = Object.fromEntries(formData as any)
+    data.is_public = formData.has('is_public')
+    data.is_accepting_members = formData.has('is_accepting_members')
+    data.show_share_info = formData.has('show_share_info')
     updateMutation.mutate(data)
   }
 
@@ -211,6 +214,136 @@ export const SettingsPage: React.FC = () => {
                               name="physical_address"
                               defaultValue={settings?.physical_address}
                               className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] focus:bg-white dark:focus:bg-slate-900 transition-all resize-none h-20" 
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Public Profile & Directory Settings */}
+                  <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
+                    <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
+                      <div className="p-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg">
+                        <Building2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">Public Profile & Directory Settings</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Configure how your SACCO appears in the public SACCO directory.</p>
+                      </div>
+                    </div>
+
+                    {isLoading ? (
+                      <div className="p-12 text-center text-slate-500">Loading settings...</div>
+                    ) : (
+                      <div className="p-6 space-y-6">
+                        {/* Toggles */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200/60 dark:border-slate-800">
+                          <label className="flex items-center gap-3 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              name="is_public"
+                              defaultChecked={!!settings?.is_public}
+                              className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-slate-900 dark:text-white block">Public Profile</span>
+                              <span className="text-[10px] text-slate-500">Enable profile in directory</span>
+                            </div>
+                          </label>
+
+                          <label className="flex items-center gap-3 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              name="is_accepting_members"
+                              defaultChecked={!!settings?.is_accepting_members}
+                              className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-slate-900 dark:text-white block">Accept Applications</span>
+                              <span className="text-[10px] text-slate-500">Allow visitor membership requests</span>
+                            </div>
+                          </label>
+
+                          <label className="flex items-center gap-3 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              name="show_share_info"
+                              defaultChecked={!!settings?.show_share_info}
+                              className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-slate-900 dark:text-white block">Show Share Info</span>
+                              <span className="text-[10px] text-slate-500">Display share capital on profile</span>
+                            </div>
+                          </label>
+                        </div>
+
+                        {/* Fields */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Location / Region</label>
+                            <input
+                              type="text"
+                              name="location"
+                              defaultValue={settings?.location}
+                              placeholder="e.g. Addis Ababa, Bole"
+                              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] transition-all"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Category</label>
+                            <input
+                              type="text"
+                              name="category"
+                              defaultValue={settings?.category}
+                              placeholder="e.g. Education, Transport, Community"
+                              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] transition-all"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Public Contact Email</label>
+                            <input
+                              type="email"
+                              name="contact_email"
+                              defaultValue={settings?.contact_email || settings?.email}
+                              placeholder="public@sacco.com"
+                              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] transition-all"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Public Contact Phone</label>
+                            <input
+                              type="tel"
+                              name="contact_phone"
+                              defaultValue={settings?.contact_phone || settings?.phone}
+                              placeholder="+251..."
+                              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] transition-all"
+                            />
+                          </div>
+
+                          <div className="md:col-span-2">
+                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Public Description & Mission</label>
+                            <textarea
+                              name="description"
+                              defaultValue={settings?.description}
+                              rows={3}
+                              placeholder="Describe your SACCO's history, mission, and benefits for public visitors..."
+                              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] transition-all resize-none"
+                            />
+                          </div>
+
+                          <div className="md:col-span-2">
+                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Membership Eligibility Criteria</label>
+                            <textarea
+                              name="eligibility_criteria"
+                              defaultValue={settings?.eligibility_criteria}
+                              rows={3}
+                              placeholder="Specify requirements for joining (e.g. resident of Bole sub-city, employee of school district, minimum age 18)..."
+                              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] transition-all resize-none"
                             />
                           </div>
                         </div>

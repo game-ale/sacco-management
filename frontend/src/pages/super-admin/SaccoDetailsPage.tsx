@@ -94,6 +94,21 @@ export const SaccoDetailsPage: React.FC = () => {
     }
   }
 
+  const handleToggleDirectoryAllowance = async (allowed: boolean) => {
+    if (!id || !sacco) return
+    setActionLoading(true)
+    try {
+      const res = await adminSaccoService.toggleDirectoryAllowance(id, allowed)
+      setSacco(res.data || { ...sacco, is_directory_allowed: allowed })
+      toast.success(`Public directory listing ${allowed ? 'enabled' : 'disabled'} for ${sacco.name}.`)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update directory allowance.'
+      toast.error(msg)
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   const formatCurrency = (amount: number) => {
     return `ETB ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   }
@@ -322,6 +337,43 @@ export const SaccoDetailsPage: React.FC = () => {
               {(details?.active_loans_count ?? 0).toLocaleString()}
             </span>
           </div>
+        </div>
+      </div>
+
+      {/* Directory Listing Control Card (Super Admin) */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs p-6 transition-colors">
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-emerald-600" />
+              <span>Public Directory Permission</span>
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Super Admin control over whether this SACCO is permitted to appear in the public directory.
+            </p>
+          </div>
+
+          <button
+            disabled={actionLoading}
+            onClick={() => handleToggleDirectoryAllowance(!sacco.is_directory_allowed)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer ${
+              sacco.is_directory_allowed
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300'
+            }`}
+          >
+            {sacco.is_directory_allowed ? (
+              <>
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Directory Allowed (Click to Restrict)</span>
+              </>
+            ) : (
+              <>
+                <XCircle className="w-4 h-4" />
+                <span>Directory Restricted (Click to Allow)</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 

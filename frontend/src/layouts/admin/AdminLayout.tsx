@@ -13,7 +13,8 @@ import {
   X,
   ChevronDown,
   LogOut,
-  User as UserIcon
+  User as UserIcon,
+  UserPlus
 } from 'lucide-react'
 import { useAuthStore } from '../../stores/auth'
 import ThemeToggle from '../../components/ThemeToggle'
@@ -38,9 +39,26 @@ export const AdminLayout: React.FC = () => {
     }
   }
 
+  const [membersMenuOpen, setMembersMenuOpen] = useState(
+    () => location.pathname.startsWith('/admin/members') || location.pathname.startsWith('/admin/membership-requests')
+  )
+
+  React.useEffect(() => {
+    if (location.pathname.startsWith('/admin/members') || location.pathname.startsWith('/admin/membership-requests')) {
+      setMembersMenuOpen(true)
+    }
+  }, [location.pathname])
+
   const navItems = [
     { label: 'Dashboard', path: '/admin', icon: LayoutDashboard },
-    { label: 'Members', path: '/admin/members', icon: Users },
+    {
+      label: 'Members',
+      path: '/admin/members',
+      icon: Users,
+      children: [
+        { label: 'Membership Requests', path: '/admin/membership-requests', icon: UserPlus },
+      ],
+    },
     { label: 'Savings', path: '/admin/savings', icon: Wallet },
     { label: 'Loans', path: '/admin/loans', icon: CreditCard },
     { label: 'Repayments', path: '/admin/repayments', icon: CalendarDays },
@@ -49,15 +67,30 @@ export const AdminLayout: React.FC = () => {
     { label: 'Settings', path: '/admin/settings', icon: Settings },
   ]
 
-  const isActive = (path: string) => {
+  const isPathActive = (path: string) => {
     if (path === '/admin') {
       return location.pathname === '/admin' || location.pathname === '/admin/'
+    }
+    if (path === '/admin/members') {
+      return location.pathname === '/admin/members' || location.pathname === '/admin/members/'
     }
     return location.pathname.startsWith(path)
   }
 
+  const navTitles = [
+    { label: 'Dashboard', path: '/admin' },
+    { label: 'Members', path: '/admin/members' },
+    { label: 'Membership Requests', path: '/admin/membership-requests' },
+    { label: 'Savings', path: '/admin/savings' },
+    { label: 'Loans', path: '/admin/loans' },
+    { label: 'Repayments', path: '/admin/repayments' },
+    { label: 'Shares', path: '/admin/shares' },
+    { label: 'Dividends', path: '/admin/dividends' },
+    { label: 'Settings', path: '/admin/settings' },
+  ]
+
   // Find current page title based on path
-  const currentTitle = navItems.find(item => isActive(item.path))?.label || 'Dashboard'
+  const currentTitle = navTitles.find(item => isPathActive(item.path))?.label || 'Dashboard'
 
   if (user?.sacco_status === 'pending') {
     return <PendingSaccoPage />
@@ -94,7 +127,68 @@ export const AdminLayout: React.FC = () => {
           <nav className="px-3 py-4 space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon
-              const active = isActive(item.path)
+              const active = isPathActive(item.path)
+              const hasChildren = item.children && item.children.length > 0
+
+              if (hasChildren) {
+                return (
+                  <div key={item.path} className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <Link
+                        to={item.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                          active
+                            ? 'bg-[#0B6B3A] text-white border-l-4 border-[#0B6B3A] shadow-md'
+                            : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                        }`}
+                        style={{ borderLeftWidth: active ? '3px' : '0' }}
+                      >
+                        <Icon className="w-5 h-5" />
+                        <span>{item.label}</span>
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => setMembersMenuOpen(!membersMenuOpen)}
+                        className="p-3 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800/60 transition-colors"
+                        title="Toggle Submenu"
+                      >
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform duration-200 ${
+                            membersMenuOpen ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {membersMenuOpen && (
+                      <div className="pl-4 space-y-1">
+                        {item.children!.map((child) => {
+                          const ChildIcon = child.icon
+                          const childActive = isPathActive(child.path)
+                          return (
+                            <Link
+                              key={child.path}
+                              to={child.path}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className={`flex items-center gap-3 pl-6 pr-4 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+                                childActive
+                                  ? 'bg-[#0B6B3A] text-white border-l-4 border-[#0B6B3A] shadow-xs font-semibold'
+                                  : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+                              }`}
+                              style={{ borderLeftWidth: childActive ? '3px' : '0' }}
+                            >
+                              <ChildIcon className="w-4 h-4" />
+                              <span>{child.label}</span>
+                            </Link>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              }
+
               return (
                 <Link
                   key={item.path}

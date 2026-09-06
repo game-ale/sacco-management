@@ -22,6 +22,7 @@ import { SaccoDetailsPage } from "./pages/super-admin/SaccoDetailsPage";
 import { AllUsersPage } from "./pages/super-admin/AllUsersPage";
 import { PlatformReportsPage } from "./pages/super-admin/PlatformReportsPage";
 import { PlatformSettingsPage } from "./pages/super-admin/PlatformSettingsPage";
+import SuperAdminHelpSupportPage from "./pages/super-admin/HelpSupportPage";
 import PublicLayout from "./components/PublicLayout";
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutPage";
@@ -51,6 +52,10 @@ import { RepaymentsPage } from "./pages/admin/RepaymentsPage";
 import { SharesPage } from "./pages/admin/SharesPage";
 import { DividendsPage } from "./pages/admin/DividendsPage";
 import { SettingsPage } from "./pages/admin/SettingsPage";
+import { MembershipRequestsPage } from "./pages/admin/MembershipRequestsPage";
+import { PublicSaccoDirectoryPage } from "./pages/public/PublicSaccoDirectoryPage";
+import { PublicSaccoProfilePage } from "./pages/public/PublicSaccoProfilePage";
+import { MembershipActivationPage } from "./pages/public/MembershipActivationPage";
 
 const queryClient = new QueryClient();
 
@@ -149,6 +154,10 @@ export default function App() {
           <Routes>
             <Route element={<PublicLayout />}>
               <Route path="/" element={<LandingPage />} />
+              <Route path="/saccos" element={<PublicSaccoDirectoryPage />} />
+              <Route path="/saccos/:id" element={<PublicSaccoProfilePage />} />
+              <Route path="/activate-membership/:token" element={<MembershipActivationPage />} />
+              <Route path="/activate-membership" element={<MembershipActivationPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/contact" element={<ContactPage />} />
@@ -218,6 +227,7 @@ export default function App() {
             >
               <Route index element={<AdminDashboardPage />} />
               <Route path="members" element={<MembersPage />} />
+              <Route path="membership-requests" element={<MembershipRequestsPage />} />
               <Route path="savings" element={<SavingsPage />} />
               <Route path="loans" element={<LoansPage />} />
               <Route path="repayments" element={<RepaymentsPage />} />
@@ -242,6 +252,7 @@ export default function App() {
               <Route path="users" element={<AllUsersPage />} />
               <Route path="reports" element={<PlatformReportsPage />} />
               <Route path="settings" element={<PlatformSettingsPage />} />
+              <Route path="help-support" element={<SuperAdminHelpSupportPage />} />
               <Route path="two-factor-setup" element={<TwoFactorSetupPage />} />
             </Route>
             {/* Member Routes */}

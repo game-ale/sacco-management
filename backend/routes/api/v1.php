@@ -18,9 +18,12 @@ use App\Http\Controllers\Api\V1\RepaymentController;
 use App\Http\Controllers\Api\V1\SaccoRegistrationController;
 use App\Http\Controllers\Api\V1\SaccoSettingsController;
 use App\Http\Controllers\Api\V1\SuperadminReportsController;
+use App\Http\Controllers\Api\V1\SuperadminSearchController;
 use App\Http\Controllers\Api\V1\SuperadminUserController;
 use App\Http\Controllers\Api\V1\TwoFactorController;
 use App\Http\Controllers\Api\V1\PublicController;
+use App\Http\Controllers\Api\V1\PublicSaccoController;
+use App\Http\Controllers\Api\V1\MembershipRequestController;
 use App\Http\Controllers\Api\V1\SavingsRequestController;
 use App\Http\Controllers\Api\V1\PaymentRequestController;
 use Illuminate\Support\Facades\Route;
@@ -37,6 +40,18 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('public')->group(function () {
     Route::get('/stats', [PublicController::class, 'getStats']);
     Route::post('/contact', [PublicController::class, 'submitContactForm']);
+    Route::get('/saccos', [PublicSaccoController::class, 'index'])->name('api.v1.public.saccos.index');
+    Route::get('/saccos/{sacco}', [PublicSaccoController::class, 'show'])->name('api.v1.public.saccos.show');
+});
+
+// Public membership submission rate-limited to 5 requests per minute per IP
+Route::middleware('throttle:5,1')->group(function (): void {
+    Route::post('public/saccos/{sacco}/membership-requests', [MembershipRequestController::class, 'publicStore'])
+        ->name('api.v1.public.membership-requests.store');
+    Route::get('public/membership-activation/{token}', [MembershipRequestController::class, 'showActivation'])
+        ->name('api.v1.public.membership-activation.show');
+    Route::post('public/membership-activation/{token}', [MembershipRequestController::class, 'completeActivation'])
+        ->name('api.v1.public.membership-activation.complete');
 });
 
 // Health check
@@ -145,6 +160,7 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated', 'role:superadmin'])
         Route::patch('saccos/{sacco}/reject', [AdminSaccoController::class, 'reject'])->name('api.v1.admin.saccos.reject');
         Route::patch('saccos/{sacco}/suspend', [AdminSaccoController::class, 'suspend'])->name('api.v1.admin.saccos.suspend');
         Route::patch('saccos/{sacco}/reactivate', [AdminSaccoController::class, 'reactivate'])->name('api.v1.admin.saccos.reactivate');
+        Route::patch('saccos/{sacco}/directory-allowance', [AdminSaccoController::class, 'toggleDirectoryAllowance'])->name('api.v1.admin.saccos.directory-allowance');
 
         // All Users (platform-wide)
         Route::get('users/export', [SuperadminUserController::class, 'export'])->name('api.v1.admin.users.export');
@@ -160,6 +176,9 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated', 'role:superadmin'])
         Route::get('reports/sacco-comparison', [SuperadminReportsController::class, 'saccoComparison'])->name('api.v1.admin.reports.sacco-comparison');
         Route::get('reports/growth-trends', [SuperadminReportsController::class, 'growthTrends'])->name('api.v1.admin.reports.growth-trends');
         Route::get('reports/geographic-distribution', [SuperadminReportsController::class, 'geographicDistribution'])->name('api.v1.admin.reports.geographic-distribution');
+
+        // Platform Search
+        Route::get('search', [SuperadminSearchController::class, 'index'])->name('api.v1.admin.search');
 
         // Platform Settings
         Route::get('platform-settings', [PlatformSettingsController::class, 'show'])->name('api.v1.admin.platform-settings.show');
@@ -203,6 +222,12 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated', 'role:admin,sacco_a
         Route::get('payment-requests/{paymentRequest}', [PaymentRequestController::class, 'showAdmin'])->name('api.v1.payment-requests.show');
         Route::patch('payment-requests/{id}/approve', [PaymentRequestController::class, 'approve'])->name('api.v1.payment-requests.approve');
         Route::patch('payment-requests/{id}/reject', [PaymentRequestController::class, 'reject'])->name('api.v1.payment-requests.reject');
+
+        // Membership Requests (Admin)
+        Route::get('membership-requests', [MembershipRequestController::class, 'indexAdmin'])->name('api.v1.membership-requests.index');
+        Route::get('membership-requests/{id}', [MembershipRequestController::class, 'showAdmin'])->name('api.v1.membership-requests.show');
+        Route::post('membership-requests/{id}/approve', [MembershipRequestController::class, 'approve'])->name('api.v1.membership-requests.approve');
+        Route::post('membership-requests/{id}/reject', [MembershipRequestController::class, 'reject'])->name('api.v1.membership-requests.reject');
     });
 
 // ─── Loan Endpoints ──────────────────────────────────────────────────
