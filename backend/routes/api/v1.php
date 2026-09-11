@@ -265,3 +265,9 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated'])->group(function ()
     Route::get('loans/{loan}/repayments', [RepaymentController::class, 'index'])->name('api.v1.loans.repayments.index');
 });
 
+
+// Chapa Payments
+Route::middleware(['auth:sanctum', 'throttle:authenticated'])->group(function (): void {
+    Route::post('payments/chapa/initialize', [\App\Http\Controllers\Api\V1\ChapaController::class, 'initialize'])->name('api.v1.payments.chapa.initialize');
+    Route::get('payments/chapa/verify', [\App\Http\Controllers\Api\V1\ChapaController::class, 'verify'])->name('api.v1.payments.chapa.verify');
+});

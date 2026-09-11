@@ -75,6 +75,8 @@ class Sacco extends Model
         'contact_email',
         'contact_phone',
         'min_shares',
+        'chapa_public_key',
+        'chapa_secret_key',
     ];
 
     /**
@@ -97,6 +99,7 @@ class Sacco extends Model
             'show_share_info' => 'boolean',
             'is_directory_allowed' => 'boolean',
             'min_shares' => 'integer',
+            'chapa_secret_key' => 'encrypted',
         ];
     }
 

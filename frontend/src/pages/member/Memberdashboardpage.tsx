@@ -15,6 +15,8 @@ import {
 import api from "../../lib/api";
 import { useAuthStore } from "../../stores/auth";
 import { MetricCard } from "@/components/member/Metriccard ";
+import { toast } from "sonner";
+import { useState } from "react";
 
 import type { Loan, LoanSchedule } from "@/types";
 
@@ -104,6 +106,9 @@ const ChangeBadge: React.FC<{ value: number }> = ({ value }) => (
 
 export const MemberDashboardPage: React.FC = () => {
   const { t } = useTranslation();
+  const [isBuySharesModalOpen, setIsBuySharesModalOpen] = useState(false);
+  const [sharesToBuy, setSharesToBuy] = useState<number | ''>('');
+  const [buyingShares, setBuyingShares] = useState(false);
   const { user } = useAuthStore();
 
   const { data: savings, isLoading: savingsLoading } = useQuery({
@@ -138,6 +143,33 @@ export const MemberDashboardPage: React.FC = () => {
   );
   const shareCapital =
     (shareInfo?.share_value ?? 0) * (shareInfo?.num_shares ?? 0);
+
+  const handleBuyShares = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sharesToBuy || Number(sharesToBuy) <= 0) return;
+    
+    setBuyingShares(true);
+    try {
+      const { initializeChapaPayment } = await import("@/services/memberPaymentService");
+      const shareValue = shareInfo?.share_value || 100;
+      const amount = Number(sharesToBuy) * shareValue;
+      
+      const res = await initializeChapaPayment({
+        amount,
+        type: "shares"
+      });
+      
+      if (res.success && res.checkout_url) {
+        window.location.href = res.checkout_url;
+      } else {
+        toast.error("Failed to initialize payment");
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Error starting checkout.");
+    } finally {
+      setBuyingShares(false);
+    }
+  };
 
   // Dynamic next installment calculation across all active loans
   const upcomingInstallmentDetails = useMemo(() => {
@@ -379,7 +411,14 @@ export const MemberDashboardPage: React.FC = () => {
           <h2 className="font-semibold text-slate-900 dark:text-white mb-3">
             {t("member.dashboard.quick_actions")}
           </h2>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              onClick={() => setIsBuySharesModalOpen(true)}
+              className="flex flex-col items-center justify-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-xs font-semibold py-3 rounded-lg"
+            >
+              <Plus className="w-4 h-4" />
+              Buy Shares
+            </button>
             <Link
               to="/member/loans/apply"
               className="flex flex-col items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold py-3 rounded-lg"
@@ -484,7 +523,62 @@ export const MemberDashboardPage: React.FC = () => {
             </table>
           </div>
         )}
+
+      {/* Buy Shares Modal */}
+      {isBuySharesModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-xl dark:bg-slate-900 overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+              <h3 className="font-bold text-slate-900 dark:text-white text-lg">Buy More Shares</h3>
+              <button onClick={() => setIsBuySharesModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleBuyShares} className="p-6 text-left">
+              <p className="text-sm text-slate-500 mb-6">
+                Increase your stake in the SACCO! The current share value is <strong>ETB {shareInfo?.share_value ?? 0}</strong> per share.
+              </p>
+              
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Number of Shares to Buy</label>
+                <input 
+                  type="number" 
+                  min="1" 
+                  required
+                  value={sharesToBuy}
+                  onChange={(e) => setSharesToBuy(e.target.value ? Number(e.target.value) : '')}
+                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  placeholder="e.g. 5"
+                />
+              </div>
+
+              {sharesToBuy && (
+                <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800 text-sm">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-emerald-700 dark:text-emerald-400 font-medium">Total Cost:</span>
+                    <span className="text-emerald-700 dark:text-emerald-400 font-bold">
+                      ETB {(Number(sharesToBuy) * (shareInfo?.share_value ?? 0)).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-600/80 dark:text-emerald-500">You will be redirected to Chapa to securely complete this payment.</p>
+                </div>
+              )}
+
+              <div className="flex gap-3 justify-end">
+                <button type="button" onClick={() => setIsBuySharesModalOpen(false)} className="px-5 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+                  Cancel
+                </button>
+                <button type="submit" disabled={buyingShares || !sharesToBuy} className="px-5 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50">
+                  {buyingShares ? "Processing..." : "Pay with Chapa"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );
 };
+export default MemberDashboardPage;
+

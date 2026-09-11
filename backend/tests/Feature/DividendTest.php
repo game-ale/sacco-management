@@ -29,6 +29,7 @@ class DividendTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        \App\Models\PlatformSetting::updateOrCreate(['id' => 1], ['saas_rent_percentage' => 0]);
 
         $this->mySacco = Sacco::create([
             'name' => 'My SACCO',

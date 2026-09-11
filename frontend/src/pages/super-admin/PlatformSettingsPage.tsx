@@ -23,6 +23,7 @@ const settingsSchema = z.object({
   auto_approve_saccos: z.boolean(),
   require_registration_verification: z.boolean(),
   max_saccos_allowed: z.number().nullable().optional(),
+  saas_rent_percentage: z.number().min(0).max(100),
   default_interest_rate: z.number().min(0).max(100),
   default_share_value: z.number().min(0),
   default_loan_to_savings_ratio: z.number().min(0),
@@ -188,6 +189,18 @@ export const PlatformSettingsPage: React.FC = () => {
                 placeholder="Leave blank for unlimited"
               />
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Limit the total number of SACCOs on the platform.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">SaaS Rent Percentage (%)</label>
+              <input
+                type="number"
+                step="0.01"
+                {...register('saas_rent_percentage', { valueAsNumber: true })}
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                placeholder="e.g. 5.0"
+              />
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Platform fee taken from SACCO profit before 70/30 split.</p>
+              {errors.saas_rent_percentage && <p className="text-xs text-rose-500 mt-1">{errors.saas_rent_percentage.message}</p>}
             </div>
           </div>
         </div>

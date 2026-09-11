@@ -30,8 +30,14 @@ class DividendController extends Controller
         $totalPool = (float) $request->validated('total_pool');
         $reservePercentage = (float) ($request->validated('reserve_percentage') ?? 0);
 
-        $reserveAmount = round($totalPool * ($reservePercentage / 100), 2);
-        $distributablePool = $totalPool - $reserveAmount;
+        // Deduct SaaS Rent first
+        $platformSettings = \App\Models\PlatformSetting::instance();
+        $saasRentPercentage = (float) $platformSettings->saas_rent_percentage;
+        $saasRentAmount = round($totalPool * ($saasRentPercentage / 100), 2);
+        $netPool = $totalPool - $saasRentAmount;
+
+        $reserveAmount = round($netPool * ($reservePercentage / 100), 2);
+        $distributablePool = $netPool - $reserveAmount;
         
         $sharePool = round($distributablePool * 0.70, 2);
         $savingsPool = $distributablePool - $sharePool;
@@ -76,6 +82,9 @@ class DividendController extends Controller
         return $this->success([
             'preview' => $preview,
             'total_pool' => $totalPool,
+            'saas_rent_percentage' => $saasRentPercentage,
+            'saas_rent_amount' => $saasRentAmount,
+            'net_pool' => $netPool,
             'reserve_percentage' => $reservePercentage,
             'reserve_amount' => $reserveAmount,
             'distributable_pool' => $distributablePool,
@@ -105,8 +114,14 @@ class DividendController extends Controller
             return $this->error("Dividends for period '{$period}' have already been distributed.", 422);
         }
 
-        $reserveAmount = round($totalPool * ($reservePercentage / 100), 2);
-        $distributablePool = $totalPool - $reserveAmount;
+        // Deduct SaaS Rent first
+        $platformSettings = \App\Models\PlatformSetting::instance();
+        $saasRentPercentage = (float) $platformSettings->saas_rent_percentage;
+        $saasRentAmount = round($totalPool * ($saasRentPercentage / 100), 2);
+        $netPool = $totalPool - $saasRentAmount;
+
+        $reserveAmount = round($netPool * ($reservePercentage / 100), 2);
+        $distributablePool = $netPool - $reserveAmount;
         
         $sharePool = round($distributablePool * 0.70, 2);
         $savingsPool = $distributablePool - $sharePool;
@@ -126,7 +141,19 @@ class DividendController extends Controller
 
         $dividendList = [];
 
-        DB::transaction(function () use ($members, $totalShares, $totalSavings, $totalPool, $sharePool, $savingsPool, $reservePercentage, $reserveAmount, $period, $saccoId, &$dividendList) {
+        DB::transaction(function () use ($members, $totalShares, $totalSavings, $totalPool, $saasRentPercentage, $saasRentAmount, $sharePool, $savingsPool, $reservePercentage, $reserveAmount, $period, $saccoId, &$dividendList) {
+            
+            // Save SaaS Invoice if applicable
+            if ($saasRentAmount > 0) {
+                \App\Models\SaasInvoice::create([
+                    'sacco_id' => $saccoId,
+                    'period' => $period,
+                    'profit_amount' => $totalPool,
+                    'rent_percentage' => $saasRentPercentage,
+                    'rent_amount' => $saasRentAmount,
+                    'status' => 'unpaid',
+                ]);
+            }
             foreach ($members as $member) {
                 $shares = (int) ($member->num_shares ?? 0);
                 $savings = (float) ($member->savings_balance ?? 0);

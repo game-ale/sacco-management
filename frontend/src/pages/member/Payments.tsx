@@ -75,7 +75,7 @@ export default function Payments() {
     },
   });
 
-  const submit = ({ amount_paid, method, notes }: PaymentForm) => {
+  const submit = async ({ amount_paid, method, notes }: PaymentForm) => {
     setSubmissionError(null);
     if (!loanId || !selectedSchedule) return;
     const amount = Number(amount_paid);
@@ -87,6 +87,27 @@ export default function Payments() {
       setError("amount_paid", { type: "validate", message: t("member.payments.amount_exceeds") });
       return;
     }
+
+    if (method === "chapa") {
+      try {
+        const { initializeChapaPayment } = await import("@/services/memberPaymentService");
+        const res = await initializeChapaPayment({
+          amount,
+          type: "loan",
+          loan_id: loanId,
+          schedule_id: selectedSchedule.id
+        });
+        if (res.success && res.checkout_url) {
+          window.location.href = res.checkout_url;
+        } else {
+          toast.error("Failed to initialize Chapa payment.");
+        }
+      } catch (err: any) {
+        toast.error(err.response?.data?.message || "Error starting Chapa checkout.");
+      }
+      return;
+    }
+
     paymentMutation.mutate({
       loanId,
       schedule_id: selectedSchedule.id,
@@ -172,6 +193,7 @@ export default function Payments() {
 
                 <Field label={t("member.payments.method")}>
                   <select className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white" {...register("method")}>
+                    <option value="chapa">Pay Online (Chapa)</option>
                     <option value="cash">{t("member.payments.method_cash")}</option>
                     <option value="bank_transfer">{t("member.payments.method_bank_transfer")}</option>
                     <option value="mobile_money">{t("member.payments.method_mobile_money")}</option>

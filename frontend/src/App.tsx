@@ -37,6 +37,7 @@ import LoanDetails from "./pages/member/LoanDetails";
 import ApplyLoan from "./pages/member/ApplyLoan";
 import Notifications from "./pages/member/Notifications";
 import Payments from "./pages/member/Payments";
+import VerifyPaymentPage from "./pages/member/VerifyPaymentPage";
 import Statements from "./pages/member/Statements";
 import AcceptInvitePage from "./pages/member/AcceptInvitePage";
 import ProfileSettingsPage from "./pages/member/ProfileSettingsPage";
@@ -274,6 +275,7 @@ export default function App() {
               <Route path="dividends" element={<Dividends />} />
               <Route path="notifications" element={<Notifications />} />
               <Route path="payments" element={<Payments />} />
+              <Route path="payments/verify" element={<VerifyPaymentPage />} />
               <Route path="statements" element={<Statements />} />
               <Route path="profile" element={<ProfileSettingsPage />} />
               <Route path="help-support" element={<HelpSupportPage />} />

@@ -52,6 +52,7 @@ export default function Savings() {
   const [modalType, setModalType] = useState<"deposit" | "withdraw" | null>(null);
   const [amountInput, setAmountInput] = useState("");
   const [descriptionInput, setDescriptionInput] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("chapa");
   const [formError, setFormError] = useState<string | null>(null);
 
   // Main Savings Query
@@ -96,6 +97,7 @@ export default function Savings() {
     setAmountInput("");
     setDescriptionInput("");
     setFormError(null);
+    setPaymentMethod("chapa");
   };
 
   const handleSubmitRequest = (e: React.FormEvent) => {
@@ -110,6 +112,22 @@ export default function Savings() {
 
     if (modalType === "withdraw" && data && numericAmount > data.balance) {
       setFormError("Withdrawal amount exceeds your current available balance.");
+      return;
+    }
+
+    if (modalType === "deposit" && paymentMethod === "chapa") {
+      import("@/services/memberPaymentService").then(({ initializeChapaPayment }) => {
+        initializeChapaPayment({
+          amount: numericAmount,
+          type: "savings"
+        }).then((res) => {
+          if (res.success && res.checkout_url) {
+            window.location.href = res.checkout_url;
+          }
+        }).catch(() => {
+          setFormError("Failed to initialize Chapa payment.");
+        });
+      });
       return;
     }
 
@@ -434,6 +452,22 @@ export default function Savings() {
                   className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
+
+              {modalType === "deposit" && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Payment Method
+                  </label>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    <option value="chapa">Pay Online (Chapa)</option>
+                    <option value="manual">Manual Request (Admin Approval)</option>
+                  </select>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">

@@ -487,6 +487,46 @@ export const SettingsPage: React.FC = () => {
                       )}
                     </div>
                   </div>
+
+                  {/* Payment Integrations */}
+                  <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col transition-colors">
+                    <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
+                      <div className="p-2 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg">
+                        <Landmark className="w-5 h-5" />
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">Payment Integrations (Chapa)</h3>
+                    </div>
+                    
+                    {isLoading ? (
+                      <div className="p-12 text-center text-slate-500">Loading settings...</div>
+                    ) : (
+                      <div className="p-6 space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Chapa Public Key</label>
+                            <input 
+                              type="text" 
+                              name="chapa_public_key"
+                              defaultValue={settings?.chapa_public_key || ''}
+                              placeholder="CHAPUBK-..."
+                              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] focus:bg-white dark:focus:bg-slate-900 transition-all" 
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Chapa Secret Key</label>
+                            <input 
+                              type="password" 
+                              name="chapa_secret_key"
+                              defaultValue={settings?.chapa_secret_key ? '********' : ''}
+                              placeholder={settings?.chapa_secret_key ? "Leave blank to keep existing key" : "CHASECK-..."}
+                              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#0B6B3A]/30 focus:border-[#0B6B3A] focus:bg-white dark:focus:bg-slate-900 transition-all" 
+                            />
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Leave blank unless updating.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   
                   <div className="flex justify-end pt-4">
                     <button type="submit" disabled={updateMutation.isPending || isLoading} className="inline-flex items-center gap-2 px-6 py-3 bg-[#0B6B3A] dark:bg-emerald-600 text-white rounded-lg text-sm font-bold hover:bg-[#095730] dark:hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-50">

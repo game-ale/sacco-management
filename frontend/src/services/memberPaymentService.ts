@@ -106,3 +106,8 @@ export async function getMyPaymentRequests(page = 1): Promise<{
   }>("/me/payment-requests", { params: { page } });
   return data;
 }
+
+export async function initializeChapaPayment(request: { amount: number; type: 'loan' | 'savings' | 'shares'; loan_id?: number; schedule_id?: number }): Promise<{ success: boolean; checkout_url?: string; message?: string }> {
+  const { data } = await api.post('/payments/chapa/initialize', request);
+  return data;
+}

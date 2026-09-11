@@ -11,6 +11,7 @@ class PlatformSetting extends Model
         'auto_approve_saccos',
         'require_registration_verification',
         'max_saccos_allowed',
+        'saas_rent_percentage',
 
         // Default SACCO Settings
         'default_interest_rate',
@@ -40,6 +41,7 @@ class PlatformSetting extends Model
             'auto_approve_saccos' => 'boolean',
             'require_registration_verification' => 'boolean',
             'max_saccos_allowed' => 'integer',
+            'saas_rent_percentage' => 'decimal:2',
             'default_interest_rate' => 'decimal:2',
             'default_share_value' => 'decimal:2',
             'default_loan_to_savings_ratio' => 'decimal:2',
