@@ -203,7 +203,18 @@ class AuthController extends Controller
             'region' => ['nullable', 'string', 'max:100'],
             'zone' => ['nullable', 'string', 'max:100'],
             'town' => ['nullable', 'string', 'max:100'],
+            'profile_photo' => ['nullable', 'image', 'max:2048'],
         ]);
+
+        
+        if ($request->hasFile('profile_photo')) {
+            if ($user->profile_photo_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo_path);
+            }
+            $path = $request->file('profile_photo')->store('profile-photos', 'public');
+            $validated['profile_photo_path'] = $path;
+        }
+        unset($validated['profile_photo']);
 
         $user->update($validated);
 

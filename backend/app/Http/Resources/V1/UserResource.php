@@ -23,6 +23,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property-read bool $is_active
  * @property-read string|null $national_id
  * @property-read string|null $region
+ * @property-read string|null $profile_photo_path
  * @property-read string|null $zone
  * @property-read string|null $town
  * @property-read bool $must_change_password
@@ -60,6 +61,7 @@ class UserResource extends JsonResource
             'region' => $this->region,
             'zone' => $this->zone,
             'town' => $this->town,
+            'profile_photo_url' => $this->profile_photo_path ? asset('storage/' . $this->profile_photo_path) : null,
             'num_shares' => (int) ($this->num_shares ?? 0),
             'savings_balance' => (float) ($this->savings_balance ?? 0),
             'is_active' => (bool) ($this->is_active ?? true),

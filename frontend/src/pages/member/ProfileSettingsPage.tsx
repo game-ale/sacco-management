@@ -3,12 +3,13 @@ import { useMutation } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useAuthStore } from '../../stores/auth'
 import { updateProfile, type UpdateProfileRequest } from '../../services/memberProfileService'
-import { User, Mail, Phone, MapPin, CreditCard, Save } from 'lucide-react'
+import { User, Mail, Phone, MapPin, CreditCard, Save, Camera } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function ProfileSettingsPage() {
   const { user } = useAuthStore()
   
+  const [photoPreview, setPhotoPreview] = useState<string | null>(user?.profile_photo_url || null)
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -17,6 +18,7 @@ export default function ProfileSettingsPage() {
     region: user?.region || '',
     zone: user?.zone || '',
     town: user?.town || '',
+    profile_photo: null as File | null,
   })
 
   const mutation = useMutation({
@@ -39,14 +41,31 @@ export default function ProfileSettingsPage() {
     },
   })
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0]
+      setFormData(prev => ({ ...prev, profile_photo: file }))
+      setPhotoPreview(URL.createObjectURL(file))
+    }
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const { email, ...payload } = formData  // email is read-only
-    void email // suppress unused var
+    const payload: UpdateProfileRequest = { 
+      name: formData.name,
+      phone: formData.phone,
+      national_id: formData.national_id,
+      region: formData.region,
+      zone: formData.zone,
+      town: formData.town,
+    }
+    if (formData.profile_photo) {
+      payload.profile_photo = formData.profile_photo;
+    }
     mutation.mutate(payload)
   }
 
@@ -60,8 +79,29 @@ export default function ProfileSettingsPage() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
           
-          <div className="space-y-6">
-            <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Personal Information</h3>
+          
+          <div className="flex flex-col md:flex-row gap-8 items-start">
+            <div className="flex-shrink-0 flex flex-col items-center gap-4">
+              <div className="relative h-32 w-32 rounded-full overflow-hidden bg-slate-100 border-4 border-white shadow-lg">
+                {photoPreview ? (
+                  <img src={photoPreview} alt="Profile" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-slate-400">
+                    <User className="h-12 w-12" />
+                  </div>
+                )}
+                <label className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
+                  <Camera className="h-6 w-6 text-white mb-1" />
+                  <span className="text-white text-xs font-semibold">Change</span>
+                  <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
+                </label>
+              </div>
+              <p className="text-xs text-slate-500 font-medium text-center">Click image to upload<br/>new profile photo</p>
+            </div>
+
+            <div className="flex-1 space-y-8 w-full">
+              <div className="space-y-6">
+                <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Personal Information</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -196,6 +236,8 @@ export default function ProfileSettingsPage() {
             </button>
           </div>
 
+          </div>
+          </div>
         </form>
       </div>
     </div>

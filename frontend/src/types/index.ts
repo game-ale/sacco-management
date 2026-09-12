@@ -14,6 +14,7 @@ export interface User {
   sacco_status?: string | null
   sacco?: Sacco | null
   national_id?: string
+  profile_photo_url?: string | null
   region?: string
   zone?: string
   town?: string

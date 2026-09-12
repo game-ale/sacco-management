@@ -42,6 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'region',
         'zone',
         'town',
+        'profile_photo_path',
         'must_change_password',
         'two_factor_secret',
         'two_factor_recovery_codes',
