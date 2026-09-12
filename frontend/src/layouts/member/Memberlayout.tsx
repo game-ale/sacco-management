@@ -146,8 +146,12 @@ const MemberLayoutInner: React.FC = () => {
       {/* Mobile Top Header */}
       <div className="md:hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-4 py-3 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-emerald-700 text-white flex items-center justify-center text-xs font-bold shrink-0">
-            {initials}
+          <div className="w-9 h-9 rounded-full bg-emerald-700 text-white flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
+            {user?.profile_photo_url ? (
+              <img src={user.profile_photo_url} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              initials
+            )}
           </div>
           <div>
             <div className="font-bold text-sm leading-tight">
@@ -181,8 +185,12 @@ const MemberLayoutInner: React.FC = () => {
         <div>
           {/* Profile block */}
           <div className="hidden md:flex items-center gap-3 px-5 py-5 border-b border-slate-100 dark:border-slate-800/80">
-            <div className="w-11 h-11 rounded-full bg-emerald-700 text-white flex items-center justify-center text-sm font-bold shrink-0">
-              {initials}
+            <div className="w-11 h-11 rounded-full bg-emerald-700 text-white flex items-center justify-center text-sm font-bold shrink-0 overflow-hidden">
+              {user?.profile_photo_url ? (
+                <img src={user.profile_photo_url} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                initials
+              )}
             </div>
             <div className="min-w-0">
               <div className="font-bold text-sm text-slate-900 dark:text-white leading-tight truncate">
