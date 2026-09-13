@@ -65,7 +65,7 @@ export default function PublicLayout() {
               </Link>
               <Link
                 to="/register"
-                className="bg-[#0B6B3A] hover:bg-[#065F46] text-white text-sm font-medium px-5 py-2.5 rounded-full transition-all shadow-sm hover:shadow-md"
+                className="group relative isolate overflow-hidden bg-linear-to-r from-[#0B6B3A] via-[#159447] to-[#0B6B3A] hover:from-[#159447] hover:via-[#27b85d] hover:to-[#159447] text-white text-sm font-medium px-4 py-2 rounded-full transition-all shadow-md shadow-[#0B6B3A]/25 hover:shadow-lg hover:shadow-[#0B6B3A]/35 ring-1 ring-white/20 after:absolute after:inset-y-0 after:-left-1/2 after:w-1/3 after:skew-x-[-20deg] after:bg-white/25 after:transition-transform after:duration-700 hover:after:translate-x-[500%]"
               >
                 Register SACCO
               </Link>

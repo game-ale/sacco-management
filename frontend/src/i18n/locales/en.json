@@ -248,7 +248,8 @@
       "date": "date",
       "recent_transactions": "Recent Transactions",
       "loans_count": "Loans count",
-      "shares_total": "Shares total"
+      "shares_total": "Shares total",
+      "type": "Type"
     },
     "payments": {
       "title": "Payments",

@@ -1,40 +1,54 @@
-import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Globe } from 'lucide-react'
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { ChevronDown, Globe } from "lucide-react";
 
 const languages = [
-  { code: 'en', label: 'English' },
-  { code: 'am', label: 'አማርኛ' },
-  { code: 'om', label: 'Afaan Oromoo' },
-]
+  { code: "en", label: "English", flag: "🇺🇸" },
+  { code: "am", label: "አማርኛ", flag: "🇪🇹" },
+  { code: "om", label: "Afaan Oromoo", flag: "🇪🇹" },
+];
 
 export function LanguageSwitcher() {
-  const { i18n } = useTranslation()
-  const [language, setLanguage] = useState(i18n.resolvedLanguage || i18n.language || 'en')
+  const { i18n } = useTranslation();
+  const [language, setLanguage] = useState(
+    i18n.resolvedLanguage || i18n.language || "en",
+  );
 
   useEffect(() => {
     const handleLanguageChanged = (nextLanguage: string) => {
-      setLanguage(nextLanguage.split('-')[0])
-    }
+      setLanguage(nextLanguage.split("-")[0]);
+    };
 
-    handleLanguageChanged(i18n.resolvedLanguage || i18n.language || 'en')
-    i18n.on('languageChanged', handleLanguageChanged)
-    return () => i18n.off('languageChanged', handleLanguageChanged)
-  }, [i18n])
+    handleLanguageChanged(i18n.resolvedLanguage || i18n.language || "en");
+    i18n.on("languageChanged", handleLanguageChanged);
+    return () => i18n.off("languageChanged", handleLanguageChanged);
+  }, [i18n]);
 
   const handleLanguageChange = (nextLanguage: string) => {
-    setLanguage(nextLanguage)
-    i18n.changeLanguage(nextLanguage)
-  }
+    setLanguage(nextLanguage);
+    i18n.changeLanguage(nextLanguage);
+  };
 
   return (
-    <label className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800" data-i18n-ignore="true">
-      <Globe className="h-5 w-5" />
+    <label
+      className="relative inline-flex h-7 w-10 items-center justify-center rounded-md text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+      data-i18n-ignore="true"
+    >
       <span className="sr-only">Language</span>
+      <span
+        className="pointer-events-none flex items-center gap-0.5 text-sm leading-none"
+        aria-hidden="true"
+      >
+        <Globe className="h-3.5 w-3.5" strokeWidth={2} />
+        <span>
+          {languages.find((option) => option.code === language)?.flag ?? "🇺🇸"}
+        </span>
+        <ChevronDown className="h-2.5 w-2.5" strokeWidth={2.5} />
+      </span>
       <select
         value={language}
         onChange={(event) => handleLanguageChange(event.target.value)}
-        className="cursor-pointer bg-transparent text-sm font-medium outline-none"
+        className="absolute inset-0 h-full w-full cursor-pointer opacity-0 outline-none"
         aria-label="Language"
       >
         {languages.map((language) => (
@@ -44,5 +58,5 @@ export function LanguageSwitcher() {
         ))}
       </select>
     </label>
-  )
+  );
 }

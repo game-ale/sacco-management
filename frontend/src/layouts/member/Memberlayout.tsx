@@ -10,9 +10,11 @@ import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   Wallet,
+  TrendingUp,
+  FileText,
+  ClipboardPlus,
   CreditCard,
   PiggyBank,
-  Receipt,
   Bell,
   UserCircle,
   HelpCircle,
@@ -60,27 +62,31 @@ const MemberLayoutInner: React.FC = () => {
       path: "/member",
       icon: LayoutDashboard,
     },
-    { label: t("member.nav.savings"), path: "/member/savings", icon: Wallet },
+    {
+      label: t("member.nav.savings"),
+      path: "/member/savings",
+      icon: PiggyBank,
+    },
     {
       label: t("member.nav.apply_loan"),
       path: "/member/loans/apply",
-      icon: CreditCard,
+      icon: ClipboardPlus,
     },
     { label: t("member.nav.loans"), path: "/member/loans", icon: CreditCard },
     {
       label: t("member.nav.make_payment"),
       path: "/member/payments",
-      icon: Zap,
+      icon: Wallet,
     },
     {
       label: t("member.nav.dividends"),
       path: "/member/dividends",
-      icon: PiggyBank,
+      icon: TrendingUp,
     },
     {
       label: t("member.nav.statements"),
       path: "/member/statements",
-      icon: Receipt,
+      icon: FileText,
     },
     {
       label: t("member.nav.notifications"),
@@ -124,7 +130,7 @@ const MemberLayoutInner: React.FC = () => {
     .reduce<string | null>(
       (longest, path) =>
         longest === null || path.length > longest.length ? path : longest,
-      null
+      null,
     );
 
   const isActive = (path: string) => path === activeNavPath;

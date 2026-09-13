@@ -248,7 +248,8 @@
       "date": "ቀን",
       "recent_transactions": "የቅርብ ጊዜ ግብይቶች",
       "loans_count": "የብድር ብዛት",
-      "shares_total": "ጠቅላላ አክሲዮን"
+      "shares_total": "ጠቅላላ አክሲዮን",
+      "type": "አይነት"
     },
     "payments": {
       "title": "ክፍያዎች",

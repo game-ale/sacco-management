@@ -5,11 +5,11 @@ import { Link } from "react-router-dom";
 import {
   Landmark,
   CreditCard,
-  PiggyBank,
   Wallet,
   AlertCircle,
   Plus,
   Eye,
+  PieChart,
   UserCog,
 } from "lucide-react";
 import api from "../../lib/api";
@@ -26,7 +26,9 @@ interface SavingsTransaction {
   amount: number;
   balance_after: number;
   description: string | null;
-  transaction_date: string;
+  date: string;
+  // TODO: confirm these field names against your actual API response —
+  // added to support the Reference/Status columns in the reference design.
   reference?: string;
   status?: "completed" | "processing" | "failed";
 }
@@ -300,7 +302,7 @@ export const MemberDashboardPage: React.FC = () => {
         <MetricCard
           title={t("member.dashboard.share_capital")}
           value={shareLoading ? "—" : `ETB ${shareCapital.toLocaleString()}`}
-          icon={PiggyBank}
+          icon={PieChart}
           accentColor="black"
           subtitle={
             !shareLoading ? (
@@ -471,7 +473,7 @@ export const MemberDashboardPage: React.FC = () => {
                     {t("member.dashboard.description")}
                   </th>
                   <th className="py-2 font-semibold">
-                    {t("member.dashboard.reference")}
+                    {t("member.dashboard.type")}
                   </th>
                   <th className="py-2 font-semibold text-right">
                     {t("member.dashboard.amount")}
@@ -488,14 +490,12 @@ export const MemberDashboardPage: React.FC = () => {
                     className="border-b border-slate-50 dark:border-slate-800/50"
                   >
                     <td className="py-3 whitespace-nowrap">
-                      {new Date(tx.transaction_date).toLocaleDateString()}
+                      {new Date(tx.date).toLocaleDateString()}
                     </td>
                     <td className="py-3">
                       {tx.description || t(`member.dashboard.type_${tx.type}`)}
                     </td>
-                    <td className="py-3 text-slate-400">
-                      {tx.reference ?? "—"}
-                    </td>
+                    <td className="py-3 text-slate-400">{tx.type ?? "—"}</td>
                     <td
                       className={`py-3 text-right font-medium whitespace-nowrap ${
                         tx.type === "deposit"

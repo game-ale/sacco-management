@@ -50,8 +50,7 @@ const mockSavings = {
         amount: 5000,
         balance_after: 145000,
         description: "Monthly Deposit",
-        transaction_date: "2026-08-01",
-        reference: "TRX-9821A",
+        date: "2026-08-01",
         status: "completed",
       },
     ],
@@ -172,12 +171,11 @@ describe("MemberDashboardPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders recent transactions with reference and status", async () => {
+  it("renders recent transactions with description and status", async () => {
     renderDashboard();
     await waitFor(() => {
       expect(screen.getByText("Monthly Deposit")).toBeInTheDocument();
     });
-    expect(screen.getByText("TRX-9821A")).toBeInTheDocument();
     expect(
       screen.getByText("member.dashboard.status_completed"),
     ).toBeInTheDocument();
