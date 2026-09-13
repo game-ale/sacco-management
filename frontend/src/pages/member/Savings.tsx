@@ -124,8 +124,8 @@ export default function Savings() {
           if (res.success && res.checkout_url) {
             window.location.href = res.checkout_url;
           }
-        }).catch(() => {
-          setFormError("Failed to initialize Chapa payment.");
+        }).catch((err) => {
+          setFormError(err.response?.data?.message || "Failed to initialize Chapa payment.");
         });
       });
       return;

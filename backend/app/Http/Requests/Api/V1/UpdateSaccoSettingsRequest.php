@@ -46,6 +46,8 @@ class UpdateSaccoSettingsRequest extends FormRequest
             'contact_email' => ['sometimes', 'nullable', 'email', 'max:255'],
             'contact_phone' => ['sometimes', 'nullable', 'string', 'max:50'],
             'min_shares' => ['sometimes', 'integer', 'min:1'],
+            'chapa_public_key' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'chapa_secret_key' => ['sometimes', 'nullable', 'string', 'max:255'],
         ];
     }
 }

@@ -55,6 +55,9 @@ export const SettingsPage: React.FC = () => {
     data.is_public = formData.has('is_public')
     data.is_accepting_members = formData.has('is_accepting_members')
     data.show_share_info = formData.has('show_share_info')
+    if (!data.chapa_secret_key) {
+      delete data.chapa_secret_key
+    }
     updateMutation.mutate(data)
   }
 
