@@ -52,7 +52,7 @@ class ChapaController extends Controller
         $txRef = "CHAPA-{$type}-{$user->id}-{$refId}-{$scheduleId}-" . Str::random(8);
 
         // Redirect URL after payment
-        $returnUrl = url("/member/payments/verify?tx_ref={$txRef}");
+        $returnUrl = $request->input('return_url') ?? url("/member/payments/verify?tx_ref={$txRef}");
 
         $chapaData = [
             'amount' => $amount,

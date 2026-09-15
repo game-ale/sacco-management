@@ -75,13 +75,13 @@ export default function HelpSupportPage() {
         Find answers, contact our team, or browse our knowledge base.
       </p>
 
-      <div className="grid md:grid-cols-3 gap-5 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 mb-6 sm:mb-8">
         {contactOptions.map((opt) => {
           const Icon = opt.icon
           return (
             <div
               key={opt.title}
-              className={`bg-white dark:bg-slate-900 border rounded-xl p-6 shadow-sm transition-colors ${
+              className={`bg-white dark:bg-slate-900 border rounded-xl p-4 sm:p-6 shadow-sm transition-colors ${
                 opt.highlight
                   ? 'border-emerald-400 ring-1 ring-emerald-400/40'
                   : 'border-slate-200 dark:border-slate-800'
@@ -99,7 +99,7 @@ export default function HelpSupportPage() {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* FAQ */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-6 shadow-sm">
           <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Frequently Asked Questions</h2>
           <div className="space-y-2">
             {FAQS.map((faq, i) => (
@@ -124,7 +124,7 @@ export default function HelpSupportPage() {
         </div>
 
         {/* Contact form */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-6 shadow-sm">
           <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Send a Message</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 mb-4">We'll get back to you within 24 hours.</p>
 

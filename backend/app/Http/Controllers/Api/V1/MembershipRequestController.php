@@ -107,11 +107,11 @@ class MembershipRequestController extends Controller
         }
 
         if ($request->filled('search')) {
-            $search = (string) $request->query('search');
-            $query->where(function ($q) use ($search): void {
-                $q->where('full_name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('phone_number', 'like', "%{$search}%");
+            $lowerSearch = '%' . mb_strtolower((string) $request->query('search')) . '%';
+            $query->where(function ($q) use ($lowerSearch): void {
+                $q->whereRaw('LOWER(full_name) LIKE ?', [$lowerSearch])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$lowerSearch])
+                    ->orWhereRaw('LOWER(phone_number) LIKE ?', [$lowerSearch]);
             });
         }
 

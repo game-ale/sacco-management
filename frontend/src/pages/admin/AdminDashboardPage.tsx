@@ -103,17 +103,17 @@ export const AdminDashboardPage: React.FC = () => {
             Welcome back, {user?.name || 'Admin'} • {format(new Date(), 'EEEE, MMMM d, yyyy')}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <button 
             onClick={handleExportReport}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <Download className="w-4 h-4" />
             Export Report
           </button>
           <button 
             onClick={() => navigate('/admin/savings')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#0B6B3A] text-white rounded-lg text-sm font-medium hover:bg-[#095730] transition-colors shadow-sm cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-[#0B6B3A] text-white rounded-lg text-sm font-medium hover:bg-[#095730] transition-colors shadow-sm cursor-pointer"
           >
             <TrendingUp className="w-4 h-4" />
             New Transaction
@@ -122,7 +122,7 @@ export const AdminDashboardPage: React.FC = () => {
       </div>
 
       {/* Metric Cards Row */}
-      <motion.div variants={fadeInUp} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <motion.div variants={fadeInUp} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Total Members */}
         <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-[140px] transition-colors">
           <div className="flex justify-between items-start">
@@ -297,8 +297,8 @@ export const AdminDashboardPage: React.FC = () => {
 
       {/* Bottom Row: Recent Activity Table */}
       <motion.div variants={fadeInUp} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
-        <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Recent Activity</h3>
+        <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Recent Activity</h3>
           <button className="text-sm font-semibold text-[#0B6B3A] dark:text-emerald-400 hover:text-[#095730] dark:hover:text-emerald-300">View All</button>
         </div>
         <div className="overflow-x-auto">

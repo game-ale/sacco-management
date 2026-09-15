@@ -26,13 +26,13 @@ class PublicSaccoController extends Controller
             ->withCount('users');
 
         if ($request->filled('search')) {
-            $search = (string) $request->query('search');
-            $query->where('name', 'like', "%{$search}%");
+            $lowerSearch = '%' . mb_strtolower((string) $request->query('search')) . '%';
+            $query->whereRaw('LOWER(name) LIKE ?', [$lowerSearch]);
         }
 
         if ($request->filled('location')) {
-            $location = (string) $request->query('location');
-            $query->where('location', 'like', "%{$location}%");
+            $lowerLocation = '%' . mb_strtolower((string) $request->query('location')) . '%';
+            $query->whereRaw('LOWER(location) LIKE ?', [$lowerLocation]);
         }
 
         if ($request->filled('category')) {

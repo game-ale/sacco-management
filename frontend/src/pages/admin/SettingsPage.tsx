@@ -108,42 +108,42 @@ export const SettingsPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-8">
         {/* Left Sidebar Tabs */}
-        <div className="w-full md:w-64 shrink-0 space-y-1">
+        <div className="w-full md:w-64 shrink-0 flex md:flex-col gap-1.5 overflow-x-auto pb-2 md:pb-0">
           <button
             onClick={() => setActiveTab('general')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+            className={`whitespace-nowrap flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg text-sm font-medium transition-colors ${
               activeTab === 'general'
                 ? 'bg-white dark:bg-slate-900 text-[#0B6B3A] dark:text-emerald-400 border-l-4 border-[#0B6B3A] dark:border-emerald-500 shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-l-4 border-transparent'
             }`}
           >
-            <SettingsIcon className="w-5 h-5" />
+            <SettingsIcon className="w-5 h-5 shrink-0" />
             General
           </button>
           
           <button
             onClick={() => setActiveTab('security')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+            className={`whitespace-nowrap flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg text-sm font-medium transition-colors ${
               activeTab === 'security'
                 ? 'bg-white dark:bg-slate-900 text-[#0B6B3A] dark:text-emerald-400 border-l-4 border-[#0B6B3A] dark:border-emerald-500 shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-l-4 border-transparent'
             }`}
           >
-            <Shield className="w-5 h-5" />
+            <Shield className="w-5 h-5 shrink-0" />
             Security
           </button>
 
           <button
             onClick={() => setActiveTab('notifications')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+            className={`whitespace-nowrap flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg text-sm font-medium transition-colors ${
               activeTab === 'notifications'
                 ? 'bg-white dark:bg-slate-900 text-[#0B6B3A] dark:text-emerald-400 border-l-4 border-[#0B6B3A] dark:border-emerald-500 shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border-l-4 border-transparent'
             }`}
           >
-            <Bell className="w-5 h-5" />
+            <Bell className="w-5 h-5 shrink-0" />
             Notifications
           </button>
         </div>

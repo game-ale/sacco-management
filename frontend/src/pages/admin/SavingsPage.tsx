@@ -365,17 +365,17 @@ export const SavingsPage: React.FC = () => {
               </div>
             </div>
             
-            <div className="flex items-center gap-3 mt-auto">
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mt-4 sm:mt-auto">
               <button 
                 onClick={() => setTransactionType('deposit')}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#0B6B3A] text-white rounded-lg text-sm font-semibold hover:bg-[#095730] transition-colors"
+                className="w-full sm:flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#0B6B3A] text-white rounded-lg text-sm font-semibold hover:bg-[#095730] transition-colors"
               >
                 <PlusCircle className="w-4 h-4" />
                 Record Deposit
               </button>
               <button 
                 onClick={() => setTransactionType('withdrawal')}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 text-slate-900 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                className="w-full sm:flex-1 flex items-center justify-center gap-2 py-2.5 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 text-slate-900 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
                 <MinusCircle className="w-4 h-4" />
                 Record Withdrawal
@@ -467,7 +467,7 @@ export const SavingsPage: React.FC = () => {
             </table>
           </div>
           
-          <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+          <div className="px-4 sm:px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-slate-500 dark:text-slate-400">
             <span>Showing {from} to {to} of {totalTx} entries</span>
             <div className="flex items-center gap-1">
               <button 
@@ -494,8 +494,8 @@ export const SavingsPage: React.FC = () => {
 
       {/* Rejection Modal */}
       {rejectingRequestId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl p-6 shadow-xl border border-slate-200 dark:border-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-3 sm:p-4">
+          <div className="w-[calc(100vw-2rem)] sm:w-full max-w-md bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-6 shadow-xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
               Reject Savings Request
             </h3>
@@ -537,14 +537,14 @@ export const SavingsPage: React.FC = () => {
       <Dialog.Root open={transactionType !== null} onOpenChange={(open) => !open && setTransactionType(null)}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 transition-opacity" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800">
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
-              <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] sm:w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+            <div className="px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+              <Dialog.Title className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                 Record {transactionType === 'deposit' ? 'Deposit' : 'Withdrawal'}
               </Dialog.Title>
             </div>
             
-            <form className="p-6 space-y-4" onSubmit={handleSubmit}>
+            <form className="p-4 sm:p-6 space-y-4" onSubmit={handleSubmit}>
               <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center">
                 <div>
                   <div className="font-semibold text-slate-900 dark:text-white">{selectedMember?.name}</div>

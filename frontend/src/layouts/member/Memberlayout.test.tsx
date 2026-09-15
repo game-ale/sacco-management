@@ -84,6 +84,8 @@ describe("MemberLayout", () => {
       name: /member\.logout/i,
     });
     fireEvent.click(logoutButtons[0]);
+    const confirmButton = screen.getByRole("button", { name: /^logout$/i });
+    fireEvent.click(confirmButton);
     expect(logout).toHaveBeenCalled();
   });
 });

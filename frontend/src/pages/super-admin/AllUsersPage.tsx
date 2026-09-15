@@ -297,7 +297,7 @@ export const AllUsersPage: React.FC = () => {
         
         {/* Pagination */}
         {data?.meta && data.meta.last_page > 1 && (
-          <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-slate-500 dark:text-slate-400">
+          <div className="px-4 sm:px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-500 dark:text-slate-400">
             <div className="text-sm">
               Showing <span className="font-medium text-slate-900 dark:text-white">{data.meta.from}</span> to <span className="font-medium text-slate-900 dark:text-white">{data.meta.to}</span> of <span className="font-medium text-slate-900 dark:text-white">{data.meta.total}</span> results
             </div>
@@ -333,7 +333,7 @@ export const AllUsersPage: React.FC = () => {
       >
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 transition-opacity" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800 p-6 space-y-4 text-center">
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] sm:w-full max-w-sm max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4 text-center">
             <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
               <Key className="w-6 h-6" />
             </div>

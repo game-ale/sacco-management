@@ -29,13 +29,15 @@ class SuperadminSearchController extends Controller
             ], 'Empty search query');
         }
 
+        $lowerQuery = '%' . mb_strtolower($query) . '%';
+
         $saccos = Sacco::query()
-            ->where(function ($q) use ($query): void {
-                $q->where('name', 'like', "%{$query}%")
-                    ->orWhere('registration_number', 'like', "%{$query}%")
-                    ->orWhere('email', 'like', "%{$query}%")
-                    ->orWhere('region', 'like', "%{$query}%")
-                    ->orWhere('contact_email', 'like', "%{$query}%");
+            ->where(function ($q) use ($lowerQuery): void {
+                $q->whereRaw('LOWER(name) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(registration_number) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(region) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(contact_email) LIKE ?', [$lowerQuery]);
             })
             ->withCount('users')
             ->limit(5)
@@ -51,12 +53,12 @@ class SuperadminSearchController extends Controller
             ]);
 
         $users = User::query()
-            ->where(function ($q) use ($query): void {
-                $q->where('name', 'like', "%{$query}%")
-                    ->orWhere('email', 'like', "%{$query}%")
-                    ->orWhere('username', 'like', "%{$query}%")
-                    ->orWhere('phone', 'like', "%{$query}%")
-                    ->orWhere('role', 'like', "%{$query}%");
+            ->where(function ($q) use ($lowerQuery): void {
+                $q->whereRaw('LOWER(name) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(username) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(phone) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(role) LIKE ?', [$lowerQuery]);
             })
             ->with('sacco:id,name')
             ->limit(5)
@@ -75,13 +77,13 @@ class SuperadminSearchController extends Controller
 
         $membershipRequests = MembershipRequest::query()
             ->with('sacco:id,name')
-            ->where(function ($q) use ($query): void {
-                $q->where('full_name', 'like', "%{$query}%")
-                    ->orWhere('email', 'like', "%{$query}%")
-                    ->orWhere('phone_number', 'like', "%{$query}%")
-                    ->orWhere('national_id', 'like', "%{$query}%")
-                    ->orWhere('status', 'like', "%{$query}%")
-                    ->orWhere('message', 'like', "%{$query}%");
+            ->where(function ($q) use ($lowerQuery): void {
+                $q->whereRaw('LOWER(full_name) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(phone_number) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(national_id) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(status) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(message) LIKE ?', [$lowerQuery]);
             })
             ->limit(5)
             ->get()

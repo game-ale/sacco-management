@@ -90,7 +90,7 @@ export const PlatformReportsPage: React.FC = () => {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Savings */}
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 p-5 shadow-sm transition-colors">
           <div className="flex items-center gap-4">
@@ -182,7 +182,7 @@ export const PlatformReportsPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Growth Trends Chart */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm p-5 flex flex-col justify-between transition-colors">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">Platform Growth Trends</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">Cumulative savings and loans over time</p>
@@ -302,7 +302,7 @@ export const PlatformReportsPage: React.FC = () => {
 
       {/* SACCO Comparison Table */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
-        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div className="px-4 sm:px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <h3 className="text-base font-bold text-slate-900 dark:text-white">SACCO Performance Comparison</h3>
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-slate-400 dark:text-slate-500" />
@@ -320,7 +320,7 @@ export const PlatformReportsPage: React.FC = () => {
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+          <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300 min-w-[600px]">
             <thead className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
               <tr>
                 <th className="px-5 py-3">SACCO Name</th>

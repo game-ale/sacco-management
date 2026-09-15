@@ -80,7 +80,7 @@ export const SharesPage: React.FC = () => {
       </motion.div>
 
       {/* Metric Cards Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Share Value */}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-[160px] transition-colors">
           <div className="flex justify-between items-start">
@@ -217,7 +217,7 @@ export const SharesPage: React.FC = () => {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-sm text-slate-500 dark:text-slate-400">
             Showing {from} to {to} of {totalMembers} members
           </div>

@@ -137,7 +137,7 @@ export const MembershipRequestsPage: React.FC = () => {
         </div>
 
         {/* Search Input */}
-        <div className="relative min-w-[240px]">
+        <div className="relative w-full md:w-auto md:min-w-[240px]">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
@@ -260,7 +260,7 @@ export const MembershipRequestsPage: React.FC = () => {
 
         {/* Pagination */}
         {meta && meta.last_page > 1 && (
-          <div className="flex items-center justify-between p-4 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-slate-100 dark:border-slate-800 gap-3">
             <span className="text-xs text-slate-500 font-semibold">
               Page {meta.current_page} of {meta.last_page} ({meta.total} total)
             </span>
@@ -286,8 +286,8 @@ export const MembershipRequestsPage: React.FC = () => {
 
       {/* Detail Modal */}
       {viewModalOpen && selectedRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-4 sm:p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-base font-bold text-slate-900 dark:text-white">Application Details</h3>
               <button onClick={() => setViewModalOpen(false)} className="text-slate-400 hover:text-slate-600">
@@ -300,7 +300,7 @@ export const MembershipRequestsPage: React.FC = () => {
                 <span className="text-slate-400 font-bold uppercase text-[10px] block">Applicant Name</span>
                 <span className="text-slate-900 dark:text-white font-bold text-sm">{selectedRequest.full_name}</span>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <span className="text-slate-400 font-bold uppercase text-[10px] block">Email</span>
                   <span className="text-slate-800 dark:text-slate-200 font-medium">{selectedRequest.email}</span>
@@ -354,8 +354,8 @@ export const MembershipRequestsPage: React.FC = () => {
 
       {/* Rejection Modal */}
       {rejectModalOpen && selectedRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-4 sm:p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center gap-2 text-rose-600 font-bold text-base border-b border-slate-100 dark:border-slate-800 pb-3">
               <AlertCircle className="w-5 h-5" />
               <h3>Reject Membership Application</h3>

@@ -151,7 +151,7 @@ export default function Notifications() {
                 <div
                   key={notif.id}
                   onClick={() => handleOpenDetail(notif)}
-                  className={`p-5 flex items-start gap-4 transition-colors cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
+                  className={`p-3.5 sm:p-5 flex items-start gap-3 sm:gap-4 transition-colors cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
                     !notif.read
                       ? 'bg-emerald-50/40 dark:bg-emerald-950/20'
                       : 'bg-white dark:bg-slate-900'
@@ -245,7 +245,7 @@ export default function Notifications() {
           onClick={() => setSelectedNotif(null)}
         >
           <div
-            className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95"
+            className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">

@@ -1,19 +1,27 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ShieldAlert, Clock, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/auth'
+import { LogoutConfirmDialog } from '../../components/ui/LogoutConfirmDialog'
 
 export const PendingSaccoPage: React.FC = () => {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const handleLogout = async () => {
+    if (isLoggingOut) return
     try {
+      setIsLoggingOut(true)
       await logout()
       navigate('/login')
     } catch {
       navigate('/login')
+    } finally {
+      setIsLoggingOut(false)
+      setShowLogoutConfirm(false)
     }
   }
 
@@ -46,14 +54,22 @@ export const PendingSaccoPage: React.FC = () => {
           </div>
 
           <button 
-            onClick={handleLogout}
-            className="w-full inline-flex justify-center items-center gap-2 px-6 py-3 bg-[#0B1727] hover:bg-slate-800 text-white rounded-xl font-medium transition-colors shadow-sm"
+            onClick={() => setShowLogoutConfirm(true)}
+            className="w-full inline-flex justify-center items-center gap-2 px-6 py-3 bg-[#0B1727] hover:bg-slate-800 text-white rounded-xl font-medium transition-colors shadow-sm cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             Sign Out
           </button>
         </div>
       </motion.div>
+
+      {/* Logout Confirmation Dialog */}
+      <LogoutConfirmDialog
+        open={showLogoutConfirm}
+        onOpenChange={setShowLogoutConfirm}
+        onConfirm={handleLogout}
+        isLoading={isLoggingOut}
+      />
     </div>
   )
 }

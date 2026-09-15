@@ -241,15 +241,15 @@ export const ManageSaccosPage: React.FC = () => {
             Review, approve, and manage registered cooperatives across the platform.
           </p>
         </div>
-        <div className="flex items-center gap-3 shrink-0 flex-wrap">
-          <div className="relative">
+        <div className="flex items-center gap-3 shrink-0 flex-wrap w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-initial">
             <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search SACCOs..."
-              className="pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all w-48 sm:w-64"
+              className="pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all w-full sm:w-64"
             />
           </div>
           <button
@@ -274,7 +274,7 @@ export const ManageSaccosPage: React.FC = () => {
       {/* Filters Row */}
       <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between transition-colors">
         {/* Filter Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
+        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1.5 md:pb-0">
           {['all', 'pending', 'approved', 'rejected', 'suspended'].map((tab) => (
             <button
               key={tab}
@@ -290,9 +290,9 @@ export const ManageSaccosPage: React.FC = () => {
           ))}
         </div>
         
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center gap-3 w-full md:w-auto flex-wrap sm:flex-nowrap">
           <select
-            className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
+            className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 outline-none cursor-pointer flex-1 sm:flex-initial"
             value={regionFilter}
             onChange={(e) => {
               setRegionFilter(e.target.value)
@@ -305,7 +305,7 @@ export const ManageSaccosPage: React.FC = () => {
             <option value="Amhara">Amhara</option>
           </select>
           <select
-            className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
+            className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 outline-none cursor-pointer flex-1 sm:flex-initial"
             value={sortFilter}
             onChange={(e) => {
               setSortFilter(e.target.value)

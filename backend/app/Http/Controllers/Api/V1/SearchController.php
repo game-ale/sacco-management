@@ -25,13 +25,15 @@ class SearchController extends Controller
             return $this->success(['members' => [], 'loans' => []], 'Empty search query');
         }
 
+        $lowerQuery = '%' . mb_strtolower((string) $query) . '%';
+
         // Search Members
         $members = User::where('sacco_id', $saccoId)
             ->where('role', 'member')
-            ->where(function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                  ->orWhere('email', 'like', "%{$query}%")
-                  ->orWhere('username', 'like', "%{$query}%");
+            ->where(function ($q) use ($lowerQuery) {
+                $q->whereRaw('LOWER(name) LIKE ?', [$lowerQuery])
+                  ->orWhereRaw('LOWER(email) LIKE ?', [$lowerQuery])
+                  ->orWhereRaw('LOWER(username) LIKE ?', [$lowerQuery]);
             })
             ->select('id', 'name', 'email', 'username')
             ->take(5)
@@ -39,14 +41,14 @@ class SearchController extends Controller
 
         // Search Loans
         $loans = Loan::where('sacco_id', $saccoId)
-            ->where(function ($q) use ($query) {
-                $q->where('loan_number', 'like', "%{$query}%")
-                  ->orWhereHas('user', function ($u) use ($query) {
-                      $u->where('name', 'like', "%{$query}%");
+            ->where(function ($q) use ($lowerQuery) {
+                $q->whereRaw('LOWER(loan_number) LIKE ?', [$lowerQuery])
+                  ->orWhereHas('user', function ($u) use ($lowerQuery) {
+                      $u->whereRaw('LOWER(name) LIKE ?', [$lowerQuery]);
                   });
             })
             ->with(['user:id,name'])
-            ->select('id', 'user_id', 'loan_number', 'principal_amount', 'status')
+            ->select('id', 'member_id', 'loan_number', 'principal_amount', 'status')
             ->take(5)
             ->get();
 

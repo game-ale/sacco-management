@@ -49,11 +49,11 @@ class SuperadminUserController extends Controller
 
         // Search by name, email, or username
         if ($request->filled('search')) {
-            $search = (string) $request->query('search');
-            $query->where(function ($q) use ($search): void {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('username', 'like', "%{$search}%");
+            $lowerSearch = '%' . mb_strtolower((string) $request->query('search')) . '%';
+            $query->where(function ($q) use ($lowerSearch): void {
+                $q->whereRaw('LOWER(name) LIKE ?', [$lowerSearch])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$lowerSearch])
+                    ->orWhereRaw('LOWER(username) LIKE ?', [$lowerSearch]);
             });
         }
 

@@ -87,6 +87,18 @@ class PublicSaccoDirectoryTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.name', 'Addis Teachers SACCO');
 
+        // Verify lowercase search matches uppercase/mixed-case record
+        $lowercaseResponse = $this->getJson('/api/v1/public/saccos?search=addis');
+        $lowercaseResponse->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', 'Addis Teachers SACCO');
+
+        // Verify lowercase location matches uppercase/mixed-case record
+        $lowercaseLocResponse = $this->getJson('/api/v1/public/saccos?location=addis');
+        $lowercaseLocResponse->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', 'Addis Teachers SACCO');
+
         $emptyResponse = $this->getJson('/api/v1/public/saccos?search=NonExistent');
         $emptyResponse->assertStatus(200)->assertJsonCount(0, 'data');
     }

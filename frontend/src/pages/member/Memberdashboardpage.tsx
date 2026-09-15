@@ -526,15 +526,15 @@ export const MemberDashboardPage: React.FC = () => {
 
       {/* Buy Shares Modal */}
       {isBuySharesModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white shadow-xl dark:bg-slate-900 overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-              <h3 className="font-bold text-slate-900 dark:text-white text-lg">Buy More Shares</h3>
-              <button onClick={() => setIsBuySharesModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-3 sm:p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-xl dark:bg-slate-900 overflow-hidden max-h-[90vh] overflow-y-auto">
+            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base sm:text-lg">Buy More Shares</h3>
+              <button onClick={() => setIsBuySharesModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
                 ✕
               </button>
             </div>
-            <form onSubmit={handleBuyShares} className="p-6 text-left">
+            <form onSubmit={handleBuyShares} className="p-4 sm:p-6 text-left">
               <p className="text-sm text-slate-500 mb-6">
                 Increase your stake in the SACCO! The current share value is <strong>ETB {shareInfo?.share_value ?? 0}</strong> per share.
               </p>

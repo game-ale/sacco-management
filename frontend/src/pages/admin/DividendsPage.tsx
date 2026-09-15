@@ -133,7 +133,7 @@ export const DividendsPage: React.FC = () => {
 
       {/* Tabs */}
       <div className="border-b border-slate-200 dark:border-slate-800">
-        <nav className="flex space-x-8">
+        <nav className="flex space-x-6 sm:space-x-8 overflow-x-auto pb-1">
           <button
             onClick={() => setActiveTab("new")}
             className={`py-4 border-b-2 font-medium text-sm transition-colors ${
@@ -278,7 +278,7 @@ export const DividendsPage: React.FC = () => {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 pt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                     <div>
                       <span className="block text-emerald-100/80 dark:text-slate-400 text-xs font-medium mb-1">
                         Share Pool (70%)
@@ -303,16 +303,16 @@ export const DividendsPage: React.FC = () => {
 
           {/* Right Column: Preview */}
           <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col transition-colors">
-            <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                   Member Distribution Preview
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Based on shareholding as of end of period.
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <button
                   onClick={handleExportDividends}
                   className="inline-flex items-center gap-2 px-3 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"

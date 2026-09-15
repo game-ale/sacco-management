@@ -54,12 +54,12 @@ class MemberController extends Controller
             ->where('id', '!=', $user->id);
 
         if ($request->filled('search')) {
-            $searchTerm = '%' . $request->search . '%';
+            $searchTerm = '%' . mb_strtolower((string) $request->search) . '%';
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', $searchTerm)
-                    ->orWhere('email', 'like', $searchTerm)
-                    ->orWhere('national_id', 'like', $searchTerm)
-                    ->orWhere('phone', 'like', $searchTerm);
+                $q->whereRaw('LOWER(name) LIKE ?', [$searchTerm])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$searchTerm])
+                    ->orWhereRaw('LOWER(national_id) LIKE ?', [$searchTerm])
+                    ->orWhereRaw('LOWER(phone) LIKE ?', [$searchTerm]);
             });
         }
 
@@ -79,11 +79,11 @@ class MemberController extends Controller
         $query = $this->getScopedMemberQuery($request);
 
         if ($request->filled('search')) {
-            $searchTerm = '%' . $request->search . '%';
+            $searchTerm = '%' . mb_strtolower((string) $request->search) . '%';
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', $searchTerm)
-                    ->orWhere('email', 'like', $searchTerm)
-                    ->orWhere('phone', 'like', $searchTerm);
+                $q->whereRaw('LOWER(name) LIKE ?', [$searchTerm])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$searchTerm])
+                    ->orWhereRaw('LOWER(phone) LIKE ?', [$searchTerm]);
             });
         }
 

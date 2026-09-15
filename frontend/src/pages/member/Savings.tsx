@@ -401,7 +401,7 @@ export default function Savings() {
         )}
 
         {!isLoading && !error && pagination && pagination.lastPage > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3 dark:border-slate-800">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 px-4 sm:px-5 py-3 dark:border-slate-800">
             <button type="button" onClick={() => setPage((current) => current - 1)} disabled={pagination.currentPage <= 1 || isFetching} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200">
               {t("member.savings.previous")}
             </button>
@@ -415,8 +415,8 @@ export default function Savings() {
 
       {/* Request Modal */}
       {modalType && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900 dark:border dark:border-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-xl bg-white p-4 sm:p-6 shadow-xl dark:bg-slate-900 dark:border dark:border-slate-800 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white capitalize">
                 Request Savings {modalType}

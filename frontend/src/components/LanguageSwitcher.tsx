@@ -11,7 +11,7 @@ const languages = [
 export function LanguageSwitcher() {
   const { i18n } = useTranslation();
   const [language, setLanguage] = useState(
-    i18n.resolvedLanguage || i18n.language || "en",
+    (i18n.resolvedLanguage || i18n.language || "en").split("-")[0],
   );
 
   useEffect(() => {
@@ -25,8 +25,9 @@ export function LanguageSwitcher() {
   }, [i18n]);
 
   const handleLanguageChange = (nextLanguage: string) => {
-    setLanguage(nextLanguage);
-    i18n.changeLanguage(nextLanguage);
+    const normalized = nextLanguage.split("-")[0];
+    setLanguage(normalized);
+    i18n.changeLanguage(normalized);
   };
 
   return (

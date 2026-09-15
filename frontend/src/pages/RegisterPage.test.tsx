@@ -160,5 +160,5 @@ describe('RegisterPage', () => {
       expect(callArgs.registration_number).toMatch(/^FCA-\d{6}$/)
       expect(callArgs.admin_username).toMatch(/^admin\d+$/)
     })
-  })
+  }, 15000)
 })

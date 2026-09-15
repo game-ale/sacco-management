@@ -249,7 +249,7 @@ export const SuperAdminDashboardPage: React.FC = () => {
 
       {/* Pending SACCO Approvals Section */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 shadow-2xs overflow-hidden mt-6 transition-colors">
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <h2 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
             Pending SACCO Approvals
           </h2>
@@ -295,7 +295,7 @@ export const SuperAdminDashboardPage: React.FC = () => {
             pendingList.map((sacco) => (
               <div
                 key={sacco.id}
-                className="px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors"
+                className="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors"
               >
                 {/* Left Info */}
                 <div className="flex items-center gap-4">

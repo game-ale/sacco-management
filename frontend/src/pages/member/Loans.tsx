@@ -151,7 +151,7 @@ export default function Loans() {
         )}
 
         {!isLoading && !error && pagination && pagination.lastPage > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3 dark:border-slate-800">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 px-4 sm:px-5 py-3 dark:border-slate-800">
             <button type="button" onClick={() => setPage((current) => current - 1)} disabled={pagination.currentPage <= 1 || isFetching} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200">
               {t("member.loans.previous")}
             </button>

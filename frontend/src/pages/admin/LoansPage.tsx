@@ -252,7 +252,7 @@ export const LoansPage: React.FC = () => {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-sm text-slate-500 dark:text-slate-400">
             Showing {from} to {to} of {totalCount} loans
           </div>
@@ -282,9 +282,9 @@ export const LoansPage: React.FC = () => {
       <Dialog.Root open={!!reviewLoan} onOpenChange={(open) => !open && handleCloseModals()}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 transition-opacity" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800">
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
-              <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] sm:w-full max-w-2xl bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800">
+            <div className="px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+              <Dialog.Title className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 Admin Loan Review & Financial Audit
               </Dialog.Title>
               <button onClick={handleCloseModals} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
@@ -292,11 +292,11 @@ export const LoansPage: React.FC = () => {
               </button>
             </div>
             
-            <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+            <div className="p-4 sm:p-6 space-y-6 max-h-[75vh] overflow-y-auto">
               {reviewLoan && (
                 <>
                   {/* Applicant & Loan Overview */}
-                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-4">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Applicant Member</div>
                       <div className="text-base font-bold text-slate-900 dark:text-white">{reviewLoan.user?.name || reviewLoan.member?.name}</div>
@@ -317,7 +317,7 @@ export const LoansPage: React.FC = () => {
                       <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         Applicant Financial Standing & 3x Limit
                       </h4>
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-900/40 rounded-lg">
                           <span className="text-xs text-slate-500 dark:text-slate-400 block">Current Savings</span>
                           <strong className="text-sm font-bold text-emerald-800 dark:text-emerald-300">
@@ -420,7 +420,7 @@ export const LoansPage: React.FC = () => {
                   )}
 
                   {/* Loan Parameters Setup */}
-                  <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-200 dark:border-slate-800">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200 dark:border-slate-800">
                     <div>
                       <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Approved Interest Rate (%)</label>
                       <input 
@@ -455,7 +455,7 @@ export const LoansPage: React.FC = () => {
               )}
             </div>
 
-            <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex justify-between bg-slate-50/50 dark:bg-slate-800/50">
+            <div className="px-4 sm:px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex flex-wrap justify-between gap-2 bg-slate-50/50 dark:bg-slate-800/50">
               <button 
                 onClick={() => rejectMutation.mutate()} 
                 disabled={rejectMutation.isPending || approveMutation.isPending || !rejectionReason} 
@@ -493,7 +493,7 @@ export const LoansPage: React.FC = () => {
       <Dialog.Root open={!!disburseLoan} onOpenChange={(open) => !open && handleCloseModals()}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 transition-opacity" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800 p-6 text-center">
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] sm:w-full max-w-sm bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800 p-4 sm:p-6 text-center">
             <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4">
               <Landmark className="w-8 h-8" />
             </div>
@@ -524,8 +524,8 @@ export const LoansPage: React.FC = () => {
       <Dialog.Root open={!!detailLoan} onOpenChange={(open) => !open && handleCloseModals()}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 transition-opacity" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800">
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] sm:w-full max-w-lg bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+            <div className="px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
               <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 Loan Details
               </Dialog.Title>
@@ -533,10 +533,10 @@ export const LoansPage: React.FC = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {detailLoan && (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <div className="text-xs text-slate-500 font-medium">Loan Number</div>
                       <div className="font-bold text-slate-900 dark:text-white">{detailLoan.loan_number}</div>

@@ -234,7 +234,7 @@ export default function ApplyLoan() {
               </div>
               {errors.amount && <p className="mt-1.5 text-sm text-rose-600 dark:text-rose-400">{errors.amount.message}</p>}
               
-              <div className="mt-2 text-xs text-slate-500 flex justify-between">
+              <div className="mt-2 text-xs text-slate-500 flex flex-col sm:flex-row justify-between gap-1">
                 <span>Your Savings: ETB {savingsBalance.toLocaleString()}</span>
                 <span>Max 3x Limit (No Guarantor): ETB {maxAllowedWithoutGuarantor.toLocaleString()}</span>
               </div>
@@ -391,7 +391,7 @@ export default function ApplyLoan() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-emerald-200/50 dark:border-emerald-800/50">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-4 border-t border-emerald-200/50 dark:border-emerald-800/50">
                 <div>
                   <p className="text-xs text-slate-500 mb-1">Total Interest</p>
                   <p className="font-semibold text-slate-900 dark:text-slate-200">

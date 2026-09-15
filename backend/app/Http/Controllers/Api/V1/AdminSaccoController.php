@@ -78,10 +78,10 @@ class AdminSaccoController extends Controller
 
         // Search by name or registration number if provided
         if ($request->filled('search')) {
-            $search = (string) $request->query('search');
-            $query->where(function ($q) use ($search): void {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('registration_number', 'like', "%{$search}%");
+            $lowerSearch = '%' . mb_strtolower((string) $request->query('search')) . '%';
+            $query->where(function ($q) use ($lowerSearch): void {
+                $q->whereRaw('LOWER(name) LIKE ?', [$lowerSearch])
+                    ->orWhereRaw('LOWER(registration_number) LIKE ?', [$lowerSearch]);
             });
         }
 
@@ -114,10 +114,10 @@ class AdminSaccoController extends Controller
         }
 
         if ($request->filled('search')) {
-            $search = (string) $request->query('search');
-            $query->where(function ($q) use ($search): void {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('registration_number', 'like', "%{$search}%");
+            $lowerSearch = '%' . mb_strtolower((string) $request->query('search')) . '%';
+            $query->where(function ($q) use ($lowerSearch): void {
+                $q->whereRaw('LOWER(name) LIKE ?', [$lowerSearch])
+                    ->orWhereRaw('LOWER(registration_number) LIKE ?', [$lowerSearch]);
             });
         }
 

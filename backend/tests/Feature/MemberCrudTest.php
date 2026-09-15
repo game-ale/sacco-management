@@ -71,6 +71,32 @@ class MemberCrudTest extends TestCase
             ->assertJsonPath('data.0.id', $this->myMember->id);
     }
 
+    public function test_admin_can_search_members_case_insensitively(): void
+    {
+        $this->myMember->update([
+            'name' => 'John Doe',
+            'email' => 'John.Doe@Example.com',
+        ]);
+
+        // Search with lowercase 'john'
+        $response = $this->actingAs($this->myAdmin)->getJson('/api/v1/members?search=john');
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $this->myMember->id);
+
+        // Search with uppercase 'DOE'
+        $response = $this->actingAs($this->myAdmin)->getJson('/api/v1/members?search=DOE');
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $this->myMember->id);
+
+        // Search with mixed-case email 'jOhN.dOe'
+        $response = $this->actingAs($this->myAdmin)->getJson('/api/v1/members?search=jOhN.dOe');
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $this->myMember->id);
+    }
+
     // ─── Create Member (Store) ───────────────────────────────────────
 
     public function test_admin_can_create_a_member(): void

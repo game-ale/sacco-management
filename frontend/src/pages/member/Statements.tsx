@@ -36,7 +36,7 @@ export default function Statements() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="divide-y divide-slate-100">
           {statements.map((stmt) => (
-            <div key={stmt.id} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
+            <div key={stmt.id} className="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
               <div className="flex items-center gap-4">
                 <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-100 shrink-0">
                   <FileText className="w-6 h-6 text-[#0B6B3A]" />

@@ -250,7 +250,7 @@ export const RepaymentsPage: React.FC = () => {
 
       {/* Navigation Tabs */}
       <div className="border-b border-slate-200 dark:border-slate-800">
-        <nav className="flex space-x-8">
+        <nav className="flex space-x-4 sm:space-x-8 overflow-x-auto pb-1">
           <button
             onClick={() => setActiveTab('requests')}
             className={`py-4 border-b-2 font-medium text-sm transition-colors cursor-pointer flex items-center gap-2 ${
@@ -712,8 +712,8 @@ export const RepaymentsPage: React.FC = () => {
 
       {/* Payment Request Rejection Modal */}
       {rejectingRequestId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl p-6 shadow-xl border border-slate-200 dark:border-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-3 sm:p-4">
+          <div className="w-[calc(100vw-2rem)] sm:w-full max-w-md bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-6 shadow-xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
               Reject Payment Request
             </h3>
@@ -755,14 +755,14 @@ export const RepaymentsPage: React.FC = () => {
       <Dialog.Root open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 transition-opacity" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800">
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-              <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] sm:w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+            <div className="px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <Dialog.Title className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                 Record Direct Loan Repayment
               </Dialog.Title>
             </div>
 
-            <form className="p-6 space-y-4" onSubmit={handlePaymentSubmit}>
+            <form className="p-4 sm:p-6 space-y-4" onSubmit={handlePaymentSubmit}>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Installment Schedule <span className="text-rose-500">*</span>
