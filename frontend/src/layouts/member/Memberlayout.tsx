@@ -29,6 +29,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LogoutConfirmDialog } from "@/components/ui/LogoutConfirmDialog";
 import { useMemberNotifications, MemberNotificationProvider } from "../../hooks/useMemberNotifications";
+import { ChatbotBubble } from "@/components/chatbot/ChatbotBubble";
 
 const MemberLayoutInner: React.FC = () => {
   const location = useLocation();
@@ -336,6 +337,8 @@ const MemberLayoutInner: React.FC = () => {
           <Outlet />
         </main>
       </div>
+
+      <ChatbotBubble />
 
       {/* Logout Confirmation Dialog */}
       <LogoutConfirmDialog

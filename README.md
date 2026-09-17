@@ -21,7 +21,11 @@ SACCO-Management-System/
 │   ├── tests/               # PHPUnit tests (Feature + Unit)
 │   └── dockerfiles/         # Docker build files
 ├── Frontend/                # React 19 + Vite + TypeScript SPA
+
+
 │   ├── src/
+
+
 │   │   ├── components/ui/  # shadcn/ui components
 │   │   ├── hooks/           # Custom hooks (useTheme)
 │   │   ├── i18n/            # Translations (English + Amharic)

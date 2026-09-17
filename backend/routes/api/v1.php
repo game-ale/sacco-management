@@ -248,6 +248,7 @@ Route::post('loans/{loan}/repayments', [RepaymentController::class, 'store'])
 Route::middleware(['auth:sanctum', 'throttle:authenticated', 'role:member'])->group(function (): void {
     Route::post('loans', [LoanController::class, 'store'])->name('api.v1.loans.store');
     Route::get('me/loans', [LoanController::class, 'myLoans'])->name('api.v1.me.loans');
+    Route::post('chat', [\App\Http\Controllers\Api\V1\ChatController::class, 'ask'])->name('api.v1.chat.ask');
 
     // Savings Requests (Member)
     Route::post('me/savings-requests', [SavingsRequestController::class, 'store'])->name('api.v1.me.savings-requests.store');
