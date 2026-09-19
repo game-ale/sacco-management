@@ -17,9 +17,15 @@ class GeminiChatService
      */
     public function generateResponse(string $prompt, string $systemInstruction = ''): string
     {
+        /** @var string|null $apiKey */
         $apiKey = config('services.gemini.api_key');
         if (empty($apiKey)) {
-            throw new Exception("Gemini API key is not configured.");
+            // Fallback: read directly from environment (useful in Docker deployments)
+            $envKey = getenv('GEMINI_API_KEY');
+            $apiKey = is_string($envKey) ? $envKey : null;
+        }
+        if (empty($apiKey)) {
+            throw new Exception("Gemini API key is not configured. Please set GEMINI_API_KEY in your environment variables.");
         }
 
         $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={$apiKey}";
