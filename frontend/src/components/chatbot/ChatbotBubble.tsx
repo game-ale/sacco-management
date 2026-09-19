@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Bot, AlertCircle } from "lucide-react";
+import { MessageCircle, X, Send, Bot, AlertCircle, Maximize2, Minimize2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { askChatbot } from "@/services/chatService";
 
@@ -12,6 +12,7 @@ interface Message {
 
 export const ChatbotBubble: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -71,6 +72,11 @@ export const ChatbotBubble: React.FC = () => {
     }
   };
 
+  // Dynamic sizing based on expanded state
+  const panelClasses = isExpanded
+    ? "w-[90vw] sm:w-[600px] md:w-[700px] h-[85vh]"
+    : "w-80 sm:w-96 h-[500px] max-h-[70vh]";
+
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       <AnimatePresence>
@@ -80,7 +86,8 @@ export const ChatbotBubble: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="bg-white dark:bg-slate-900 w-80 sm:w-96 h-[500px] max-h-[70vh] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 mb-4 flex flex-col overflow-hidden"
+            layout
+            className={`bg-white dark:bg-slate-900 ${panelClasses} rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 mb-4 flex flex-col overflow-hidden transition-all duration-300`}
           >
             {/* Header */}
             <div className="bg-[#0B6B3A] text-white p-4 flex items-center justify-between shadow-md z-10">
@@ -93,13 +100,27 @@ export const ChatbotBubble: React.FC = () => {
                   <p className="text-xs text-white/70">Online</p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-1 hover:bg-white/20 rounded-full transition-colors"
-                aria-label="Close Chat"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="p-1.5 hover:bg-white/20 rounded-full transition-colors"
+                  aria-label={isExpanded ? "Collapse Chat" : "Expand Chat"}
+                  title={isExpanded ? "Collapse" : "Expand"}
+                >
+                  {isExpanded ? (
+                    <Minimize2 className="w-4 h-4" />
+                  ) : (
+                    <Maximize2 className="w-4 h-4" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-1.5 hover:bg-white/20 rounded-full transition-colors"
+                  aria-label="Close Chat"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Messages Area */}
@@ -112,7 +133,7 @@ export const ChatbotBubble: React.FC = () => {
                   }`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-2xl p-3 text-sm ${
+                    className={`max-w-[85%] rounded-2xl p-3 text-sm ${
                       msg.sender === "user"
                         ? "bg-[#0B6B3A] text-white rounded-br-none"
                         : msg.isError
@@ -132,7 +153,7 @@ export const ChatbotBubble: React.FC = () => {
                         </span>
                       </div>
                     )}
-                    <p className="whitespace-pre-wrap leading-relaxed">
+                    <p className="whitespace-pre-wrap leading-relaxed break-words">
                       {msg.text}
                     </p>
                   </div>
