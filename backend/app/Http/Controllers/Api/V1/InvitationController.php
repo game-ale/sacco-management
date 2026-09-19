@@ -37,20 +37,29 @@ class InvitationController extends Controller
 
         $token = Str::random(60);
 
-        $invitation = Invitation::create([
-            'sacco_id' => $saccoId,
-            'email' => $request->email,
-            'token' => $token,
-            'expires_at' => now()->addDays(7),
-        ]);
+        try {
+            DB::beginTransaction();
 
-        Mail::to($request->email)->send(new MemberInvitationMail($invitation));
+            $invitation = Invitation::create([
+                'sacco_id' => $saccoId,
+                'email' => $request->email,
+                'token' => $token,
+                'expires_at' => now()->addDays(7),
+            ]);
 
-        return $this->success(
-            ['token' => $token],
-            'Invitation sent successfully.',
-            201
-        );
+            Mail::to($request->email)->send(new MemberInvitationMail($invitation));
+
+            DB::commit();
+
+            return $this->success(
+                ['token' => $token],
+                'Invitation sent successfully.',
+                201
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->error('Failed to send email: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
