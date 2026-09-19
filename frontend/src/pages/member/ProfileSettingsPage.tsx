@@ -1,12 +1,20 @@
+import { useNavigate } from 'react-router-dom'
 import React, { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useAuthStore } from '../../stores/auth'
 import { updateProfile, type UpdateProfileRequest } from '../../services/memberProfileService'
-import { User, Mail, Phone, MapPin, CreditCard, Save, Camera } from 'lucide-react'
+import { User, Mail, Phone, MapPin, CreditCard, Save, Camera, Shield } from 'lucide-react'
 import { toast } from 'sonner'
+import { authService } from '../../services/authService'
 
 export default function ProfileSettingsPage() {
+  const navigate = useNavigate()
+  const getProfile = useAuthStore((state) => state.getProfile)
+  const [showDisableConfirm, setShowDisableConfirm] = useState(false)
+  const [disablePassword, setDisablePassword] = useState('')
+  const [isDisabling, setIsDisabling] = useState(false)
+
   const { user } = useAuthStore()
   
   const [photoPreview, setPhotoPreview] = useState<string | null>(user?.profile_photo_url || null)
@@ -51,6 +59,28 @@ export default function ProfileSettingsPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  
+  const handleDisable2FA = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!disablePassword) {
+      toast.error("Password is required")
+      return
+    }
+    
+    setIsDisabling(true)
+    try {
+      await authService.disableTwoFactor(disablePassword)
+      toast.success("Two-factor authentication disabled successfully")
+      await getProfile()
+      setShowDisableConfirm(false)
+      setDisablePassword('')
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to disable 2FA. Check your password.")
+    } finally {
+      setIsDisabling(false)
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -221,6 +251,92 @@ export default function ProfileSettingsPage() {
                     className="pl-10 w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-[#0B6B3A] focus:ring-1 focus:ring-[#0B6B3A] outline-none"
                   />
                 </div>
+              </div>
+            </div>
+          </div>
+
+          
+          {/* Two Factor Authentication Section */}
+          <div className="space-y-6 mt-12">
+            <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Security Settings</h3>
+            
+            <div className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
+              <div className="px-6 py-5 border-b border-slate-200 flex items-center gap-3">
+                <div className="p-2 bg-slate-200 text-slate-600 rounded-lg">
+                  <Shield className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Two-Factor Authentication</h3>
+                  <p className="text-sm text-slate-500">Add additional security to your account using TOTP.</p>
+                </div>
+              </div>
+              
+              <div className="p-6">
+                {user?.two_factor_confirmed_at ? (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 text-emerald-600 bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                      <Shield className="w-5 h-5 shrink-0" />
+                      <span className="font-medium text-sm">Two-factor authentication is currently enabled.</span>
+                    </div>
+                    
+                    {!showDisableConfirm ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowDisableConfirm(true)}
+                        className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                      >
+                        Disable Two-Factor Authentication
+                      </button>
+                    ) : (
+                      <div className="bg-white p-4 rounded-lg border border-slate-200 space-y-4">
+                        <p className="text-sm text-slate-700 font-medium">Please enter your password to confirm disabling 2FA.</p>
+                        <div>
+                          <input
+                            type="password"
+                            placeholder="Current Password"
+                            value={disablePassword}
+                            onChange={(e) => setDisablePassword(e.target.value)}
+                            className="w-full max-w-sm px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500"
+                            required
+                          />
+                        </div>
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={handleDisable2FA}
+                            disabled={isDisabling || !disablePassword}
+                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+                          >
+                            {isDisabling ? "Disabling..." : "Confirm Disable"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowDisableConfirm(false)
+                              setDisablePassword('')
+                            }}
+                            className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-sm font-medium transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm text-slate-600 mb-6">
+                      When two-factor authentication is enabled, you will be prompted for a secure, random token during authentication. You may retrieve this token from your phone's Google Authenticator application.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/member/two-factor-setup')}
+                      className="px-6 py-2.5 bg-slate-900 text-white rounded-lg text-sm font-bold shadow-sm transition-colors hover:bg-slate-800"
+                    >
+                      Enable Two-Factor Authentication
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

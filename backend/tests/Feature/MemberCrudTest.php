@@ -105,8 +105,8 @@ class MemberCrudTest extends TestCase
             'name' => 'New Guy',
             'email' => 'newguy@example.com',
             'username' => 'newguy',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
         ];
 
         $response = $this->actingAs($this->myAdmin)->postJson('/api/v1/members', $payload);
@@ -127,8 +127,8 @@ class MemberCrudTest extends TestCase
             'name' => 'New Guy',
             'email' => $this->otherMember->email, // Already exists!
             'username' => 'newguy123',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
         ];
 
         $response = $this->actingAs($this->myAdmin)->postJson('/api/v1/members', $payload);

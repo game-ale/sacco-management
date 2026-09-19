@@ -31,7 +31,7 @@ class SaccoRegistrationRequest extends FormRequest
             'admin_name' => ['required', 'string', 'max:255'],
             'admin_email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'admin_username' => ['required', 'string', 'max:255', 'unique:users,username'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::min(8)->mixedCase()->numbers()->symbols()],
             'national_id' => ['required', 'string', 'max:255'],
             'region' => ['required', 'string', 'max:255'],
             'zone' => ['required', 'string', 'max:255'],

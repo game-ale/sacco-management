@@ -19,8 +19,8 @@ class AuthTest extends TestCase
             'name' => 'John Doe',
             'email' => 'john@example.com',
             'username' => 'johndoe',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
         ];
 
         $response = $this->postJson('/api/v1/register', $payload);
@@ -44,8 +44,8 @@ class AuthTest extends TestCase
         $response = $this->postJson('/api/v1/register', [
             'email' => 'john@example.com',
             'username' => 'johndoe',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
         ]);
 
         $response->assertUnprocessable()
@@ -58,8 +58,8 @@ class AuthTest extends TestCase
             'name' => 'John',
             'email' => 'not-an-email',
             'username' => 'johndoe',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
         ]);
 
         $response->assertUnprocessable()
@@ -74,8 +74,8 @@ class AuthTest extends TestCase
             'name' => 'John',
             'email' => 'existing@example.com',
             'username' => 'johndoe',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
         ]);
 
         $response->assertUnprocessable()
@@ -90,8 +90,8 @@ class AuthTest extends TestCase
             'name' => 'John',
             'email' => 'new@example.com',
             'username' => 'johndoe',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
         ]);
 
         $response->assertUnprocessable()
@@ -104,7 +104,7 @@ class AuthTest extends TestCase
             'name' => 'John',
             'email' => 'john@example.com',
             'username' => 'johndoe',
-            'password' => 'password123',
+            'password' => 'StrongPass123!',
         ]);
 
         $response->assertUnprocessable()
@@ -117,12 +117,12 @@ class AuthTest extends TestCase
     {
         User::factory()->create([
             'email' => 'john@example.com',
-            'password' => bcrypt('password123'),
+            'password' => bcrypt('StrongPass123!'),
         ]);
 
         $response = $this->postJson('/api/v1/login', [
             'login' => 'john@example.com',
-            'password' => 'password123',
+            'password' => 'StrongPass123!',
         ]);
 
         $response->assertOk()
@@ -137,12 +137,12 @@ class AuthTest extends TestCase
     {
         User::factory()->create([
             'username' => 'johndoe',
-            'password' => bcrypt('password123'),
+            'password' => bcrypt('StrongPass123!'),
         ]);
 
         $response = $this->postJson('/api/v1/login', [
             'login' => 'johndoe',
-            'password' => 'password123',
+            'password' => 'StrongPass123!',
         ]);
 
         $response->assertOk()
@@ -153,7 +153,7 @@ class AuthTest extends TestCase
     {
         User::factory()->create([
             'email' => 'john@example.com',
-            'password' => bcrypt('password123'),
+            'password' => bcrypt('StrongPass123!'),
         ]);
 
         $response = $this->postJson('/api/v1/login', [
@@ -169,7 +169,7 @@ class AuthTest extends TestCase
     {
         $response = $this->postJson('/api/v1/login', [
             'login' => 'nobody@example.com',
-            'password' => 'password123',
+            'password' => 'StrongPass123!',
         ]);
 
         $response->assertUnprocessable()
@@ -179,7 +179,7 @@ class AuthTest extends TestCase
     public function test_login_requires_login_field(): void
     {
         $response = $this->postJson('/api/v1/login', [
-            'password' => 'password123',
+            'password' => 'StrongPass123!',
         ]);
 
         $response->assertUnprocessable()

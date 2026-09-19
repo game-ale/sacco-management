@@ -46,7 +46,16 @@ class AuthController extends Controller
                     'password' => Hash::make($request->password),
                 ]);
 
-                $user->sendEmailVerificationNotification();
+                $otp = sprintf("%06d", mt_rand(100000, 999999));
+                $user->email_verification_code = $otp;
+                $user->email_verification_expires_at = now()->addMinutes(10);
+                $user->save();
+
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\EmailOtpMail($otp));
+
+                // We can still send the standard link or skip it if we only want OTP. 
+                // We'll skip the built-in notification since we're using OTP now.
+                // $user->sendEmailVerificationNotification();
 
                 ActivityLogger::register($request);
 
@@ -253,6 +262,48 @@ class AuthController extends Controller
     }
 
     /**
+     * Verify Email via 6-digit OTP
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function verifyEmailOtp(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|string|size:6',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return $this->error('User not found.', 404);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return $this->success(null, __('auth.email_already_verified'));
+        }
+
+        if ($user->email_verification_code !== $request->otp) {
+            return $this->error('Invalid OTP.', 400);
+        }
+
+        if (now()->greaterThan($user->email_verification_expires_at)) {
+            return $this->error('OTP has expired.', 400);
+        }
+
+        $user->markEmailAsVerified();
+        $user->email_verification_code = null;
+        $user->email_verification_expires_at = null;
+        $user->save();
+
+        event(new Verified($user));
+        ActivityLogger::emailVerified();
+
+        return $this->success(null, __('auth.email_verified'));
+    }
+
+    /**
      * Resend Verification Email
      *
      * @return JsonResponse
@@ -265,7 +316,12 @@ class AuthController extends Controller
             return $this->success(null, __('auth.email_already_verified'));
         }
 
-        $user->sendEmailVerificationNotification();
+        $otp = sprintf("%06d", mt_rand(100000, 999999));
+        $user->email_verification_code = $otp;
+        $user->email_verification_expires_at = now()->addMinutes(10);
+        $user->save();
+
+        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\EmailOtpMail($otp));
 
         return $this->success(null, __('auth.email_sent'));
     }

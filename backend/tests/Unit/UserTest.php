@@ -33,6 +33,8 @@ class UserTest extends TestCase
             'town',
             'profile_photo_path',
             'must_change_password',
+            'email_verification_code',
+            'email_verification_expires_at',
             'two_factor_secret',
             'two_factor_recovery_codes',
             'two_factor_confirmed_at',
