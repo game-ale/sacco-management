@@ -59,7 +59,7 @@ class ChatController extends Controller
     {
         $messageLower = strtolower($message);
         
-        $reply = "I'm currently in Offline FAQ Mode. (Error: API Key missing or unavailable). ";
+        $reply = "I'm currently in Offline FAQ Mode. (Error: {$errorMsg}). ";
         
         if (str_contains($messageLower, 'savings') || str_contains($messageLower, 'deposit')) {
             $reply .= "To deposit savings, go to the 'Savings' tab and click 'Deposit'. You can pay online via Chapa or upload a manual receipt.";
