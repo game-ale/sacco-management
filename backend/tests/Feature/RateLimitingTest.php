@@ -42,8 +42,8 @@ class RateLimitingTest extends TestCase
                 'name' => 'Test',
                 'email' => "test{$i}@example.com",
                 'username' => "test{$i}",
-                'password' => 'password123',
-                'password_confirmation' => 'password123',
+                'password' => 'StrongPass123!',
+                'password_confirmation' => 'StrongPass123!',
             ]);
         }
 
@@ -52,8 +52,8 @@ class RateLimitingTest extends TestCase
             'name' => 'Test',
             'email' => 'test6@example.com',
             'username' => 'test6',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
         ]);
 
         $response->assertStatus(429);

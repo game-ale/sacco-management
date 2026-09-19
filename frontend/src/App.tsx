@@ -278,6 +278,7 @@ export default function App() {
               <Route path="payments/verify" element={<VerifyPaymentPage />} />
               <Route path="statements" element={<Statements />} />
               <Route path="profile" element={<ProfileSettingsPage />} />
+              <Route path="two-factor-setup" element={<TwoFactorSetupPage />} />
               <Route path="help-support" element={<HelpSupportPage />} />
             </Route>
 

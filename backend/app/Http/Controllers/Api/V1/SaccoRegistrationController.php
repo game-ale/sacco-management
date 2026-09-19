@@ -52,8 +52,13 @@ class SaccoRegistrationController extends Controller
                     'town' => $request->town,
                 ]);
 
+                $otp = sprintf("%06d", mt_rand(100000, 999999));
+                $user->email_verification_code = $otp;
+                $user->email_verification_expires_at = now()->addMinutes(10);
+                $user->save();
+
                 try {
-                    $user->sendEmailVerificationNotification();
+                    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\EmailOtpMail($otp));
                 } catch (\Throwable $e) {
                     \Illuminate\Support\Facades\Log::warning('Verification email sending failed: ' . $e->getMessage());
                 }
