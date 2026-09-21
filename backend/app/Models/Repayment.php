@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float $amount
  * @property Carbon $paid_at
  * @property string $method
+ * @property string|null $reference_number
  * @property int $recorded_by
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -34,6 +35,7 @@ class Repayment extends Model
         'amount',
         'paid_at',
         'method',
+        'reference_number',
         'recorded_by',
     ];
 

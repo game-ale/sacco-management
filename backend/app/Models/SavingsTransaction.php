@@ -20,6 +20,7 @@ class SavingsTransaction extends Model
         'amount',
         'balance_after',
         'description',
+        'reference_number',
         'transaction_date',
     ];
 
