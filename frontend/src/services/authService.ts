@@ -21,7 +21,12 @@ export const authService = {
     new_password: string
     new_password_confirmation: string
   }) => {
-    const response = await api.put('/change-password', data)
+    const payload = {
+      current_password: data.current_password,
+      password: data.new_password,
+      password_confirmation: data.new_password_confirmation
+    }
+    const response = await api.put('/change-password', payload)
     return response.data
   },
 
