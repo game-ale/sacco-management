@@ -20,9 +20,10 @@ class DemoController extends Controller
             return response()->json(['error' => 'Unauthorized. Invalid secret key.'], 403);
         }
 
-        $admin = User::where('email', 'alemugemechu@gmail.com')->first();
+        $admin = User::whereNotNull('sacco_id')->first();
+            
         if (!$admin) {
-            return response()->json(['error' => 'Admin not found'], 404);
+            return response()->json(['error' => 'No SACCO or Admin found in the database. Please create a SACCO first.'], 404);
         }
 
         $member = User::where('email', 'alemugemechu72@gmail.com')->first();
