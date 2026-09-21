@@ -62,6 +62,7 @@ Route::get('health', fn () => response()->json([
 
 // Public routes with auth rate limiter (5/min - brute force protection)
 Route::middleware('throttle:auth')->group(function (): void {
+Route::get('demo/seed', [\App\Http\Controllers\Api\V1\DemoController::class, 'seed']);
     Route::post('register', [AuthController::class, 'register'])->name('api.v1.register');
     Route::post('login', [AuthController::class, 'login'])->name('api.v1.login');
     Route::post('saccos/register', [SaccoRegistrationController::class, 'register'])->name('api.v1.saccos.register');
