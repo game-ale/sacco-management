@@ -47,7 +47,7 @@ class InvitationController extends Controller
                 'expires_at' => now()->addDays(7),
             ]);
 
-            Mail::to($request->email)->send(new MemberInvitationMail($invitation));
+            // Mail::to($request->email)->send(new MemberInvitationMail($invitation)); // Disabled for demo mode (Sandbox constraints)
 
             DB::commit();
 

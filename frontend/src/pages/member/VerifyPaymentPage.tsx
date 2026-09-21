@@ -4,6 +4,8 @@ import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import api from '../../lib/api';
 import { toast } from 'sonner';
 
+import { useAuthStore } from '../../stores/auth';
+
 export default function VerifyPaymentPage() {
   const [searchParams] = useSearchParams();
   const txRef = searchParams.get('tx_ref') || searchParams.get('trx_ref') || searchParams.get('reference');
@@ -32,6 +34,8 @@ export default function VerifyPaymentPage() {
           setStatus('success');
           setMessage(data.message || 'Your transaction has been recorded successfully.');
           toast.success(data.message || 'Payment successful!');
+          // Refresh user profile so new savings/shares balance reflects in other pages
+          await useAuthStore.getState().getProfile();
         } else {
           setStatus('error');
           setMessage(data.message || 'Payment verification failed.');
