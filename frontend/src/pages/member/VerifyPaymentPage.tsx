@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import api from '../../lib/api';
@@ -6,30 +6,42 @@ import { toast } from 'sonner';
 
 export default function VerifyPaymentPage() {
   const [searchParams] = useSearchParams();
-  const txRef = searchParams.get('tx_ref');
+  const txRef = searchParams.get('tx_ref') || searchParams.get('trx_ref') || searchParams.get('reference');
   const navigate = useNavigate();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [message, setMessage] = useState<string>('');
+  const verifiedRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!txRef) {
       setStatus('error');
+      setMessage('Missing transaction reference.');
       toast.error('Missing transaction reference.');
       return;
     }
 
+    if (verifiedRef.current === txRef) {
+      return;
+    }
+    verifiedRef.current = txRef;
+
     const verify = async () => {
       try {
-        const { data } = await api.get(`/payments/chapa/verify?tx_ref=${txRef}`);
+        const { data } = await api.get(`/payments/chapa/verify?tx_ref=${encodeURIComponent(txRef)}`);
         if (data.success) {
           setStatus('success');
+          setMessage(data.message || 'Your transaction has been recorded successfully.');
           toast.success(data.message || 'Payment successful!');
         } else {
           setStatus('error');
+          setMessage(data.message || 'Payment verification failed.');
           toast.error(data.message || 'Payment verification failed.');
         }
       } catch (err: any) {
         setStatus('error');
-        toast.error(err.response?.data?.message || 'Error verifying payment.');
+        const errMsg = err.response?.data?.message || 'Error verifying payment.';
+        setMessage(errMsg);
+        toast.error(errMsg);
       }
     };
 
@@ -50,7 +62,7 @@ export default function VerifyPaymentPage() {
         <>
           <CheckCircle2 className="w-20 h-20 text-emerald-500 mb-4" />
           <h2 className="text-2xl font-bold text-slate-800">Payment Successful!</h2>
-          <p className="text-slate-500 mt-2 mb-6">Your transaction has been recorded successfully.</p>
+          <p className="text-slate-500 mt-2 mb-6">{message || 'Your transaction has been recorded successfully.'}</p>
           <button onClick={() => navigate('/member/payments')} className="px-6 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700">
             Return to Payments
           </button>
@@ -61,7 +73,7 @@ export default function VerifyPaymentPage() {
         <>
           <XCircle className="w-20 h-20 text-rose-500 mb-4" />
           <h2 className="text-2xl font-bold text-slate-800">Payment Failed</h2>
-          <p className="text-slate-500 mt-2 mb-6">We could not verify your payment. Please try again or contact support.</p>
+          <p className="text-slate-500 mt-2 mb-6">{message || 'We could not verify your payment. Please try again or contact support.'}</p>
           <button onClick={() => navigate('/member/payments')} className="px-6 py-2 bg-slate-200 text-slate-800 rounded-lg font-medium hover:bg-slate-300">
             Return to Payments
           </button>

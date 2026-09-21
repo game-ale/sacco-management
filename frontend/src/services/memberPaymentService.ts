@@ -108,6 +108,10 @@ export async function getMyPaymentRequests(page = 1): Promise<{
 }
 
 export async function initializeChapaPayment(request: { amount: number; type: 'loan' | 'savings' | 'shares'; loan_id?: number; schedule_id?: number; return_url?: string }): Promise<{ success: boolean; checkout_url?: string; message?: string }> {
-  const { data } = await api.post('/payments/chapa/initialize', request);
+  const return_url = request.return_url ?? `${window.location.origin}/member/payments/verify`;
+  const { data } = await api.post('/payments/chapa/initialize', {
+    ...request,
+    return_url,
+  });
   return data;
 }
