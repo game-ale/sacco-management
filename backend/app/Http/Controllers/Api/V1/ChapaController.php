@@ -69,7 +69,7 @@ class ChapaController extends Controller
         $txRef = "CHAPA-{$type}-{$user->id}-{$refId}-{$scheduleId}-" . Str::random(8);
 
         // Redirect URL after payment
-        $baseReturnUrl = $request->input('return_url') ?? (rtrim(config('app.frontend_url', env('APP_FRONTEND_URL', 'http://localhost:5173')), '/') . '/member/payments/verify');
+        $baseReturnUrl = $request->input('return_url') ?? (rtrim(config('app.frontend_url', 'http://localhost:5173'), '/') . '/member/payments/verify');
         $separator = str_contains($baseReturnUrl, '?') ? '&' : '?';
         $returnUrl = str_contains($baseReturnUrl, 'tx_ref=') ? $baseReturnUrl : "{$baseReturnUrl}{$separator}tx_ref={$txRef}";
 
